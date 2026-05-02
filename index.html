@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🚀 MAP Test Adventure</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%);
+      min-height: 100vh;
+      color: #fff;
+      overflow-x: hidden;
+    }
+    .stars {
+      position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0;
+    }
+    .star {
+      position: absolute; width: 3px; height: 3px; background: #fff;
+      border-radius: 50%; animation: twinkle var(--d, 3s) infinite;
+      opacity: var(--o, 0.6);
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: var(--o, 0.6); transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.5); }
+    }
+    #app {
+      position: relative; z-index: 1;
+      max-width: 860px; margin: 0 auto;
+      padding: 40px 20px 60px;
+      text-align: center;
+    }
+    .hero-emoji {
+      font-size: 90px;
+      animation: bounce 2s ease-in-out infinite;
+      display: block;
+      margin-bottom: 16px;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-14px); }
+    }
+    h1 {
+      font-size: clamp(2rem, 6vw, 3.2rem);
+      font-weight: 900;
+      background: linear-gradient(135deg, #FFD700, #FF6B35, #FF1493);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 12px;
+      line-height: 1.2;
+    }
+    .subtitle {
+      font-size: 1.1rem;
+      color: #a0c4ff;
+      margin-bottom: 40px;
+      line-height: 1.5;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      max-width: 760px;
+      margin: 0 auto 50px;
+    }
+    @media (max-width: 600px) {
+      .cards { grid-template-columns: 1fr; }
+    }
+    .grade-card {
+      background: rgba(255,255,255,0.07);
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 24px;
+      padding: 36px 28px;
+      cursor: pointer;
+      text-decoration: none;
+      color: #fff;
+      display: block;
+      transition: transform 0.25s, box-shadow 0.25s, background 0.25s, border-color 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+    .grade-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--card-glow, rgba(255,215,0,0.05));
+      opacity: 0;
+      transition: opacity 0.3s;
+      border-radius: inherit;
+    }
+    .grade-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      border-color: var(--card-color, #FFD700);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 30px var(--card-shadow, rgba(255,215,0,0.3));
+    }
+    .grade-card:hover::before { opacity: 1; }
+    .grade-card.grade4 { --card-color: #FFD700; --card-shadow: rgba(255,215,0,0.3); --card-glow: rgba(255,215,0,0.05); }
+    .grade-card.grade5 { --card-color: #FF6B9D; --card-shadow: rgba(255,107,157,0.3); --card-glow: rgba(255,107,157,0.05); }
+    .card-emoji { font-size: 64px; display: block; margin-bottom: 16px; }
+    .card-title {
+      font-size: 1.7rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+    .card-subtitle {
+      font-size: 1rem;
+      color: #a0c4ff;
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+    .card-age {
+      display: inline-block;
+      background: rgba(255,255,255,0.12);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 0.85rem;
+      margin-bottom: 18px;
+      color: #e0e0ff;
+    }
+    .card-topics {
+      list-style: none;
+      text-align: left;
+      font-size: 0.88rem;
+      color: #ccd6ff;
+      line-height: 1.8;
+    }
+    .card-topics li::before { content: '✦ '; color: var(--card-color, #FFD700); }
+    .card-cta {
+      display: inline-block;
+      margin-top: 22px;
+      background: linear-gradient(135deg, var(--card-color, #FFD700), var(--card-shadow-raw, #FF9500));
+      color: #1a1a2e;
+      font-weight: 800;
+      font-size: 1rem;
+      padding: 12px 28px;
+      border-radius: 50px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      transition: transform 0.2s;
+    }
+    .grade-card:hover .card-cta { transform: scale(1.05); }
+    .grade-card.grade4 .card-cta { --card-shadow-raw: #FF9500; }
+    .grade-card.grade5 .card-cta { --card-color: #FF6B9D; --card-shadow-raw: #c44dff; color: #fff; }
+
+    .info-section {
+      background: rgba(255,255,255,0.05);
+      border-radius: 16px;
+      padding: 24px 28px;
+      max-width: 580px;
+      margin: 0 auto;
+      font-size: 0.95rem;
+      color: #b8c8ff;
+      line-height: 1.7;
+    }
+    .info-section h3 { color: #fff; margin-bottom: 10px; font-size: 1.1rem; }
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      max-width: 660px;
+      margin: 0 auto 36px;
+    }
+    .feature-chip {
+      background: rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 0.85rem;
+      color: #d0e0ff;
+      text-align: center;
+    }
+    .feature-chip .fi { font-size: 1.4rem; display: block; margin-bottom: 4px; }
+    .section-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #6b89c4;
+      margin: 36px 0 18px;
+    }
+  </style>
+</head>
+<body>
+<div class="stars" id="stars"></div>
+<div id="app">
+  <span class="hero-emoji">🚀</span>
+  <h1>MAP Test Adventure</h1>
+  <p class="subtitle">Interactive practice for Math, Reading &amp; Language.<br>Choose your grade and blast off!</p>
+
+  <p class="section-label">🌟 Features</p>
+  <div class="features">
+    <div class="feature-chip"><span class="fi">🎯</span>Adaptive Difficulty</div>
+    <div class="feature-chip"><span class="fi">⏱️</span>Practice &amp; Test Modes</div>
+    <div class="feature-chip"><span class="fi">🎉</span>Confetti &amp; Feedback</div>
+    <div class="feature-chip"><span class="fi">🔥</span>Streak Counter</div>
+    <div class="feature-chip"><span class="fi">📊</span>Score Breakdown</div>
+    <div class="feature-chip"><span class="fi">🔍</span>Review Mistakes</div>
+  </div>
+
+  <p class="section-label">📚 Choose Your Grade</p>
+  <div class="cards">
+    <a href="grade4/index.html" class="grade-card grade4">
+      <span class="card-emoji">🌟</span>
+      <div class="card-title">Grade 4</div>
+      <div class="card-subtitle">Year 5</div>
+      <span class="card-age">Age 9–10</span>
+      <ul class="card-topics">
+        <li>Place value &amp; rounding</li>
+        <li>Multiplication &amp; division</li>
+        <li>Fractions &amp; decimals</li>
+        <li>Area, perimeter &amp; geometry</li>
+        <li>Reading comprehension</li>
+        <li>Grammar &amp; punctuation</li>
+      </ul>
+      <div class="card-cta">Start Grade 4 →</div>
+    </a>
+
+    <a href="grade5/index.html" class="grade-card grade5">
+      <span class="card-emoji">🚀</span>
+      <div class="card-title">Grade 5</div>
+      <div class="card-subtitle">Year 6</div>
+      <span class="card-age">Age 10–11</span>
+      <ul class="card-topics">
+        <li>Multi-digit multiplication &amp; long division</li>
+        <li>Decimal &amp; fraction operations</li>
+        <li>Volume, coordinates &amp; algebra</li>
+        <li>GCF, LCM &amp; mean/median/mode</li>
+        <li>Advanced reading &amp; inference</li>
+        <li>Verb moods, clauses &amp; colons</li>
+      </ul>
+      <div class="card-cta">Start Grade 5 →</div>
+    </a>
+  </div>
+
+  <div class="info-section">
+    <h3>📝 About MAP Tests</h3>
+    The MAP (Measures of Academic Progress) test is an adaptive assessment used to measure student growth in Math, Reading, and Language. These practice questions follow the MAP RIT score framework and are designed to build confidence and skills for both UK and US curricula.
+  </div>
+</div>
+
+<script>
+  // Star field
+  const container = document.getElementById('stars');
+  for (let i = 0; i < 120; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${2+Math.random()*4}s;--o:${0.3+Math.random()*0.7};width:${1+Math.random()*3}px;height:${1+Math.random()*3}px;animation-delay:${Math.random()*4}s`;
+    container.appendChild(s);
+  }
+</script>
+</body>
+</html>

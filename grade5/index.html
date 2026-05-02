@@ -1,0 +1,1756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🚀 Grade 5 / Year 6 — MAP Test Adventure</title>
+  <style>
+    /* ===== BASE & RESET ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%);
+      min-height: 100vh;
+      color: #fff;
+      overflow-x: hidden;
+    }
+    .stars { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+    .star {
+      position: absolute; width: 3px; height: 3px; background: #fff;
+      border-radius: 50%; animation: twinkle var(--d, 3s) infinite;
+      opacity: var(--o, 0.6);
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: var(--o, 0.6); transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.5); }
+    }
+    #app {
+      position: relative; z-index: 1;
+      max-width: 780px; margin: 0 auto;
+      padding: 20px 16px 40px;
+      min-height: 100vh;
+    }
+    #homeScreen { text-align: center; padding-top: 30px; }
+    .logo-mascot { font-size: 80px; animation: bounce 2s ease-in-out infinite; display: block; margin-bottom: 10px; }
+    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+    .app-title {
+      font-size: clamp(1.8rem, 5vw, 2.8rem); font-weight: 900;
+      background: linear-gradient(90deg, #FF6B9D, #c44dff, #3b82f6, #22c55e);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+    .app-subtitle { font-size: 1.1rem; color: #94a3b8; margin-bottom: 30px; }
+    .subject-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 24px; }
+    .subject-card {
+      background: rgba(255,255,255,0.07); border: 2px solid transparent;
+      border-radius: 18px; padding: 20px 14px; cursor: pointer; transition: all 0.25s; text-align: center;
+    }
+    .subject-card:hover, .subject-card.selected {
+      background: rgba(255,255,255,0.14); transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+    .subject-card.selected { border-color: var(--color); }
+    .subject-card .icon { font-size: 2.4rem; display: block; margin-bottom: 8px; }
+    .subject-card .label { font-weight: 700; font-size: 1.05rem; }
+    .subject-card .count { font-size: 0.8rem; color: #94a3b8; margin-top: 2px; }
+    .subject-card[data-subject="all"]  { --color: #FF6B9D; }
+    .subject-card[data-subject="math"] { --color: #3b82f6; }
+    .subject-card[data-subject="reading"] { --color: #22c55e; }
+    .subject-card[data-subject="language"] { --color: #f59e0b; }
+    .mode-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+    .mode-btn {
+      background: rgba(255,255,255,0.07); border: 2px solid transparent;
+      border-radius: 14px; padding: 14px 10px; cursor: pointer; transition: all 0.2s; text-align: center;
+    }
+    .mode-btn:hover, .mode-btn.selected {
+      background: rgba(255,255,255,0.14); border-color: #c44dff; transform: translateY(-2px);
+    }
+    .mode-btn .icon { font-size: 1.6rem; display: block; margin-bottom: 4px; }
+    .mode-btn .label { font-weight: 700; font-size: 0.95rem; }
+    .mode-btn .desc { font-size: 0.75rem; color: #94a3b8; margin-top: 2px; }
+    .start-btn {
+      display: block; width: 100%; padding: 18px;
+      background: linear-gradient(135deg, #c44dff, #FF6B9D);
+      border: none; border-radius: 16px; font-size: 1.25rem;
+      font-weight: 800; color: #fff; cursor: pointer; transition: all 0.2s;
+      box-shadow: 0 4px 20px rgba(196,77,255,0.4);
+    }
+    .start-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(196,77,255,0.5); }
+    #quizScreen { display: none; }
+    .quiz-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .subject-badge {
+      padding: 4px 12px; border-radius: 20px; font-size: 0.8rem;
+      font-weight: 700; white-space: nowrap;
+    }
+    .progress-wrap { flex: 1; }
+    .progress-bar-bg { background: rgba(255,255,255,0.1); border-radius: 10px; height: 10px; overflow: hidden; }
+    .progress-bar-fill {
+      height: 100%; border-radius: 10px;
+      background: linear-gradient(90deg, #c44dff, #FF6B9D, #f59e0b);
+      transition: width 0.4s ease; width: 0%;
+    }
+    .progress-text { font-size: 0.78rem; color: #94a3b8; margin-top: 3px; }
+    .score-chip {
+      background: rgba(255,107,157,0.15); border: 1px solid rgba(255,107,157,0.3);
+      border-radius: 20px; padding: 4px 12px; font-size: 0.85rem;
+      font-weight: 700; color: #FF6B9D; white-space: nowrap;
+    }
+    .timer-wrap { display: none; }
+    .timer-wrap.active { display: block; }
+    .timer {
+      font-size: 1rem; font-weight: 700; padding: 4px 12px;
+      border-radius: 20px; background: rgba(239,68,68,0.15);
+      border: 1px solid rgba(239,68,68,0.3); color: #f87171;
+    }
+    .timer.urgent { background: rgba(239,68,68,0.4); animation: pulse 0.5s infinite; }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.6; } }
+    .difficulty-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+    .diff-label { font-size: 0.8rem; color: #94a3b8; }
+    .diff-stars { font-size: 1rem; letter-spacing: 2px; }
+    .topic-tag {
+      margin-left: auto; font-size: 0.75rem; color: #c084fc;
+      background: rgba(196,77,255,0.1); padding: 2px 10px; border-radius: 10px;
+    }
+    .question-card {
+      background: rgba(255,255,255,0.06); backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 22px;
+      padding: 28px 24px; margin-bottom: 20px; animation: fadeIn 0.35s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .question-num { font-size: 0.8rem; color: #94a3b8; margin-bottom: 8px; }
+    .question-text { font-size: clamp(1rem, 2.5vw, 1.18rem); font-weight: 600; line-height: 1.6; margin-bottom: 8px; }
+    .passage-box {
+      background: rgba(255,255,255,0.05); border-left: 3px solid #c44dff;
+      border-radius: 8px; padding: 14px 16px;
+      font-size: 0.92rem; line-height: 1.7; color: #cbd5e1;
+      margin-bottom: 16px; font-style: italic;
+    }
+    .options-grid { display: flex; flex-direction: column; gap: 10px; }
+    .option-btn {
+      display: flex; align-items: center; gap: 14px;
+      background: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 14px; padding: 14px 18px; cursor: pointer; transition: all 0.2s;
+      text-align: left; font-size: 1rem; color: #fff; font-family: inherit;
+    }
+    .option-btn:hover:not(:disabled) {
+      background: rgba(255,255,255,0.12); border-color: rgba(196,77,255,0.5);
+      transform: translateX(4px);
+    }
+    .option-btn .opt-letter {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(255,255,255,0.1); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.9rem;
+    }
+    .option-btn .opt-text { line-height: 1.4; flex: 1; }
+    .option-btn.correct { background: rgba(34,197,94,0.15) !important; border-color: #22c55e !important; }
+    .option-btn.correct .opt-letter { background: #22c55e; }
+    .option-btn.incorrect { background: rgba(239,68,68,0.15) !important; border-color: #ef4444 !important; }
+    .option-btn.incorrect .opt-letter { background: #ef4444; }
+    .option-btn.dimmed { opacity: 0.4; cursor: default; }
+    .option-btn:disabled { cursor: default; }
+    .feedback-panel {
+      border-radius: 18px; padding: 20px; margin-bottom: 16px;
+      animation: slideUp 0.3s ease; display: none;
+    }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    .feedback-panel.correct-fb { background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3); }
+    .feedback-panel.incorrect-fb { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); }
+    .feedback-headline { font-size: 1.1rem; font-weight: 800; margin-bottom: 8px; }
+    .feedback-headline.correct-fb { color: #4ade80; }
+    .feedback-headline.incorrect-fb { color: #f87171; }
+    .feedback-explanation { font-size: 0.93rem; line-height: 1.65; color: #cbd5e1; }
+    .correct-answer-note { margin-top: 10px; font-size: 0.88rem; color: #86efac; font-weight: 600; }
+    .next-btn {
+      display: block; width: 100%; padding: 16px;
+      background: linear-gradient(135deg, #c44dff, #FF6B9D);
+      border: none; border-radius: 14px; font-size: 1.1rem;
+      font-weight: 700; color: #fff; cursor: pointer; transition: all 0.2s;
+      box-shadow: 0 4px 16px rgba(196,77,255,0.3);
+    }
+    .next-btn:hover { transform: translateY(-2px); }
+    .streak-banner { text-align: center; padding: 8px; font-size: 0.9rem; font-weight: 700; color: #ffd700; animation: fadeIn 0.3s; display: none; }
+    #resultsScreen { display: none; text-align: center; padding-top: 20px; }
+    .result-trophy { font-size: 5rem; animation: spin 1s ease-out; display: block; margin-bottom: 10px; }
+    @keyframes spin { from { transform: rotate(-20deg) scale(0); } to { transform: rotate(0) scale(1); } }
+    .result-title { font-size: 2rem; font-weight: 900; margin-bottom: 6px; }
+    .result-score-big {
+      font-size: 3.5rem; font-weight: 900;
+      background: linear-gradient(90deg, #FF6B9D, #c44dff);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .result-score-label { font-size: 1rem; color: #94a3b8; margin-bottom: 16px; }
+    .stars-row { font-size: 2.5rem; margin-bottom: 20px; letter-spacing: 4px; }
+    .result-message { font-size: 1.1rem; color: #cbd5e1; margin-bottom: 28px; line-height: 1.5; }
+    .breakdown-card {
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 18px; padding: 20px 24px; margin-bottom: 20px; text-align: left;
+    }
+    .breakdown-title { font-size: 0.85rem; color: #94a3b8; font-weight: 600; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 1px; }
+    .breakdown-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .breakdown-subject { font-size: 0.9rem; font-weight: 600; flex: 1; }
+    .breakdown-bar-bg { flex: 2; height: 8px; background: rgba(255,255,255,0.1); border-radius: 6px; overflow: hidden; }
+    .breakdown-bar-fill { height: 100%; border-radius: 6px; transition: width 1s ease; }
+    .breakdown-pct { font-size: 0.85rem; font-weight: 700; width: 44px; text-align: right; }
+    .result-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    .result-btn {
+      padding: 14px; border: none; border-radius: 14px;
+      font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s;
+    }
+    .result-btn.primary { background: linear-gradient(135deg, #c44dff, #FF6B9D); color: #fff; box-shadow: 0 4px 16px rgba(196,77,255,0.3); }
+    .result-btn.secondary { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #fff; }
+    .result-btn:hover { transform: translateY(-2px); }
+    #reviewScreen { display: none; }
+    .review-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+    .back-btn { background: rgba(255,255,255,0.08); border: none; border-radius: 10px; padding: 8px 14px; color: #fff; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.2s; }
+    .back-btn:hover { background: rgba(255,255,255,0.14); }
+    .review-title { font-size: 1.3rem; font-weight: 800; }
+    .review-item {
+      background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25);
+      border-radius: 16px; padding: 18px 20px; margin-bottom: 16px;
+    }
+    .review-q { font-size: 0.95rem; font-weight: 600; margin-bottom: 10px; line-height: 1.5; }
+    .review-your-answer { font-size: 0.85rem; color: #f87171; margin-bottom: 4px; }
+    .review-correct-answer { font-size: 0.85rem; color: #4ade80; margin-bottom: 10px; font-weight: 700; }
+    .review-explanation { font-size: 0.85rem; color: #94a3b8; line-height: 1.6; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.07); }
+    .confetti-wrap { position: fixed; inset: 0; pointer-events: none; z-index: 999; overflow: hidden; }
+    .confetti-piece {
+      position: absolute; width: 10px; height: 14px;
+      opacity: 0; animation: confettiFall var(--dur, 2.5s) ease-in var(--delay, 0s) forwards;
+    }
+    @keyframes confettiFall {
+      0% { opacity: 1; transform: translateY(-30px) rotate(0deg); }
+      100% { opacity: 0; transform: translateY(100vh) rotate(720deg); }
+    }
+    .hidden { display: none !important; }
+    @media (max-width: 480px) {
+      .subject-grid { grid-template-columns: 1fr 1fr; }
+      .result-btns { grid-template-columns: 1fr; }
+      .question-card { padding: 20px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="stars" id="starsContainer"></div>
+<div class="confetti-wrap" id="confettiContainer"></div>
+
+<div id="app">
+
+  <!-- HOME SCREEN -->
+  <div id="homeScreen">
+    <div style="margin-bottom:14px"><a href="../index.html" style="display:inline-flex;align-items:center;gap:6px;color:#a0c4ff;font-size:0.9rem;font-weight:600;text-decoration:none;background:rgba(255,255,255,0.07);padding:6px 14px;border-radius:20px;">← All Grades</a></div>
+    <span class="logo-mascot">🚀</span>
+    <h1 class="app-title">Grade 5 / Year 6</h1>
+    <p class="app-subtitle">MAP Test Practice — Math · Reading · Language · Age 10–11</p>
+
+    <h2 style="font-size:0.9rem;color:#94a3b8;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px;">Choose a Subject</h2>
+    <div class="subject-grid">
+      <div class="subject-card selected" data-subject="all" onclick="selectSubject('all',this)">
+        <span class="icon">🚀</span>
+        <div class="label">All Subjects</div>
+        <div class="count">108 questions</div>
+      </div>
+      <div class="subject-card" data-subject="math" onclick="selectSubject('math',this)">
+        <span class="icon">🔢</span>
+        <div class="label">Math</div>
+        <div class="count">42 questions</div>
+      </div>
+      <div class="subject-card" data-subject="reading" onclick="selectSubject('reading',this)">
+        <span class="icon">📚</span>
+        <div class="label">Reading</div>
+        <div class="count">38 questions</div>
+      </div>
+      <div class="subject-card" data-subject="language" onclick="selectSubject('language',this)">
+        <span class="icon">✏️</span>
+        <div class="label">Language</div>
+        <div class="count">28 questions</div>
+      </div>
+    </div>
+
+    <h2 style="font-size:0.9rem;color:#94a3b8;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px;">Choose a Mode</h2>
+    <div class="mode-row">
+      <div class="mode-btn selected" data-mode="practice" onclick="selectMode('practice',this)">
+        <span class="icon">🌱</span>
+        <div class="label">Practice Mode</div>
+        <div class="desc">Learn at your own pace. No timer, instant hints.</div>
+      </div>
+      <div class="mode-btn" data-mode="test" onclick="selectMode('test',this)">
+        <span class="icon">⏱️</span>
+        <div class="label">Test Mode</div>
+        <div class="desc">Simulate the real MAP test with a timer.</div>
+      </div>
+    </div>
+
+    <button class="start-btn" onclick="startQuiz()">🚀 Start Your Adventure!</button>
+    <p style="font-size:0.78rem;color:#475569;margin-top:18px;">
+      Based on NWEA MAP Growth standards for Grade 5 / Year 6 &bull; Adaptive difficulty
+    </p>
+    <p style="margin-top:12px"><a href="../index.html" style="color:#6b89c4;font-size:0.8rem;text-decoration:none;">← Back to grade selection</a></p>
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div id="quizScreen">
+    <div class="quiz-header">
+      <div class="subject-badge" id="subjectBadge">Math</div>
+      <div class="progress-wrap">
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
+        <div class="progress-text" id="progressText">Question 1 of 20</div>
+      </div>
+      <div class="score-chip" id="scoreChip">0 ⭐</div>
+      <div class="timer-wrap" id="timerWrap">
+        <div class="timer" id="timerDisplay">⏱ 00:00</div>
+      </div>
+    </div>
+    <div class="difficulty-row">
+      <span class="diff-label">Difficulty:</span>
+      <span class="diff-stars" id="diffStars">⭐⭐</span>
+      <span class="topic-tag" id="topicTag"></span>
+    </div>
+    <div class="streak-banner" id="streakBanner">🔥 Amazing streak!</div>
+    <div class="question-card" id="questionCard">
+      <div class="question-num" id="questionNum">Question 1</div>
+      <div class="passage-box hidden" id="passageBox"></div>
+      <div class="question-text" id="questionText"></div>
+      <div class="options-grid" id="optionsGrid"></div>
+    </div>
+    <div class="feedback-panel" id="feedbackPanel">
+      <div class="feedback-headline" id="feedbackHeadline"></div>
+      <div class="feedback-explanation" id="feedbackExplanation"></div>
+      <div class="correct-answer-note hidden" id="correctAnswerNote"></div>
+    </div>
+    <button class="next-btn hidden" id="nextBtn" onclick="nextQuestion()">Next Question →</button>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div id="resultsScreen">
+    <span class="result-trophy" id="resultTrophy">🏆</span>
+    <h2 class="result-title" id="resultTitle">Great Job!</h2>
+    <div class="result-score-big" id="resultScoreBig">0/0</div>
+    <div class="result-score-label" id="resultScoreLabel">Questions Correct</div>
+    <div class="stars-row" id="resultStars">⭐⭐⭐</div>
+    <p class="result-message" id="resultMessage"></p>
+    <div class="breakdown-card">
+      <div class="breakdown-title">Performance by Subject</div>
+      <div id="breakdownRows"></div>
+    </div>
+    <div class="result-btns">
+      <button class="result-btn primary" onclick="restartQuiz()">🔄 Play Again</button>
+      <button class="result-btn secondary" id="reviewBtn" onclick="showReview()">👀 Review Mistakes</button>
+    </div>
+    <button class="result-btn secondary" style="width:100%;margin-top:0" onclick="goHome()">🏠 Subject Menu</button>
+    <a href="../index.html" style="display:block;text-align:center;color:#6b89c4;font-size:0.85rem;text-decoration:none;margin-top:10px;">← Back to grade selection</a>
+  </div>
+
+  <!-- REVIEW SCREEN -->
+  <div id="reviewScreen">
+    <div class="review-header">
+      <button class="back-btn" onclick="showResults()">← Back</button>
+      <h2 class="review-title">📖 Review Your Mistakes</h2>
+    </div>
+    <div id="reviewItems"></div>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// GRADE 5 / YEAR 6 — 108 verified MAP Test questions
+// Math: 42 | Reading: 38 | Language: 28
+// ============================================================
+const QUESTIONS = [
+
+  // ===================== MATH (42) =====================
+
+  // --- Multi-digit Multiplication ---
+  {
+    id:1, subject:'math', topic:'Multi-digit Multiplication', difficulty:2,
+    question:'What is 234 × 56?',
+    options:['13,004','13,104','12,904','13,204'],
+    answer:1,
+    explanation:'Break it down: 234 × 50 = 11,700 and 234 × 6 = 1,404. Add: 11,700 + 1,404 = 13,104. Double-check: 234 × 56 = 234 × (60 − 4) = 14,040 − 936 = 13,104. ✓ Always check by estimating: 230 × 56 ≈ 12,880, so 13,104 is reasonable.'
+  },
+  {
+    id:2, subject:'math', topic:'Multi-digit Multiplication', difficulty:2,
+    question:'What is 347 × 28?',
+    options:['9,616','9,716','9,816','9,516'],
+    answer:1,
+    explanation:'347 × 28 = 347 × 20 + 347 × 8 = 6,940 + 2,776 = 9,716. Verify: 350 × 28 = 9,800. 9,800 − 3 × 28 = 9,800 − 84 = 9,716. ✓ Multi-digit multiplication benefits from the distributive property to split it into manageable parts.'
+  },
+  {
+    id:3, subject:'math', topic:'Multi-digit Multiplication', difficulty:3,
+    question:'A factory produces 468 widgets per hour. How many widgets are produced in a 24-hour day?',
+    options:['11,032','11,232','11,432','11,632'],
+    answer:2,
+    explanation:'468 × 24 = 468 × 20 + 468 × 4 = 9,360 + 1,872 = 11,232. Check: 468 × 24 ≈ 470 × 24 = 11,280, close to 11,232. ✓ This is a real-world multiplication problem — identify what you are multiplying (rate × time = total).'
+  },
+
+  // --- Long Division ---
+  {
+    id:4, subject:'math', topic:'Long Division', difficulty:2,
+    question:'What is 578 ÷ 17? (Find the quotient and remainder)',
+    options:['33 remainder 17','34 remainder 0','33 remainder 7','34 remainder 7'],
+    answer:1,
+    explanation:'17 × 34 = 578 exactly: 17 × 30 = 510; 17 × 4 = 68; 510 + 68 = 578. So the quotient is 34 and the remainder is 0. Long division check: 578 ÷ 17 — how many 17s fit in 578? 17 × 30 = 510; 578 − 510 = 68; 68 ÷ 17 = 4. Quotient = 34, remainder = 0. Always verify by multiplying back: 17 × 34 = 578 ✓'
+  },
+  {
+    id:5, subject:'math', topic:'Long Division', difficulty:2,
+    question:'What is 693 ÷ 21?',
+    options:['32','33','34','35'],
+    answer:1,
+    explanation:'21 × 33 = 693. Check: 21 × 30 = 630; 21 × 3 = 63; 630 + 63 = 693. ✓ Long division: 693 ÷ 21 — start with hundreds: 21 goes into 69 → 3 times (21×3=63), remainder 6. Bring down 3 → 63. 21 goes into 63 → 3 times. Quotient: 33.'
+  },
+  {
+    id:6, subject:'math', topic:'Long Division', difficulty:3,
+    question:'A school orders 1,248 pencils to distribute equally among 32 classrooms. How many pencils does each classroom get?',
+    options:['38','39','40','41'],
+    answer:1,
+    explanation:'1,248 ÷ 32: 32 × 39 = 32 × 40 − 32 = 1,280 − 32 = 1,248. ✓ So each classroom gets 39 pencils. Check by multiplying: 32 × 39 = 1,248. Division is the inverse of multiplication — always verify with multiplication!'
+  },
+  {
+    id:7, subject:'math', topic:'Long Division', difficulty:2,
+    question:'What is 845 ÷ 13?',
+    options:['63 r 6','64 r 13','65 r 0','65 r 2'],
+    answer:2,
+    explanation:'13 × 65 = 845: 13 × 60 = 780; 13 × 5 = 65; 780 + 65 = 845. ✓ Quotient = 65, remainder = 0. Estimation tip: 845 ÷ 13 ≈ 800 ÷ 13 ≈ 61, so 65 is in the right range. Always estimate first to check your answer is reasonable.'
+  },
+
+  // --- Decimal Operations ---
+  {
+    id:8, subject:'math', topic:'Decimal Operations', difficulty:1,
+    question:'What is 4.67 + 2.85?',
+    options:['7.42','7.52','7.62','6.52'],
+    answer:1,
+    explanation:'Line up decimal points and add: 4.67 + 2.85. Hundredths: 7+5=12 (write 2, carry 1). Tenths: 6+8+1=15 (write 5, carry 1). Ones: 4+2+1=7. Answer: 7.52. The key to decimal addition is ALWAYS align the decimal points before adding!'
+  },
+  {
+    id:9, subject:'math', topic:'Decimal Operations', difficulty:2,
+    question:'What is 12.4 − 5.87?',
+    options:['6.53','7.47','6.43','7.53'],
+    answer:0,
+    explanation:'12.40 − 5.87 (add a zero to align): Hundredths: 0−7, borrow → 10−7=3, tenths becomes 3. Tenths: 3−8, borrow → 13−8=5, ones becomes 11. Ones: 11−5=6. Answer: 6.53. When subtracting decimals with different decimal places, add trailing zeros to match places.'
+  },
+  {
+    id:10, subject:'math', topic:'Decimal Operations', difficulty:2,
+    question:'What is 3.6 × 4?',
+    options:['12.4','14.4','13.4','15.4'],
+    answer:1,
+    explanation:'Ignore the decimal: 36 × 4 = 144. Count decimal places: 3.6 has 1 decimal place, so move the decimal 1 place left: 14.4. Check: 3.6 × 4 = 3 × 4 + 0.6 × 4 = 12 + 2.4 = 14.4. ✓ Multiplying a decimal by a whole number: multiply normally, then restore the decimal point.'
+  },
+  {
+    id:11, subject:'math', topic:'Decimal Operations', difficulty:2,
+    question:'Which decimal is greatest? 0.45, 0.405, 0.5, 0.045',
+    options:['0.45','0.405','0.5','0.045'],
+    answer:2,
+    explanation:'Compare decimals by looking at tenths place first: 0.5 has 5 tenths, 0.45 has 4 tenths, 0.405 has 4 tenths, 0.045 has 0 tenths. The greatest is 0.5. Tip: 0.5 = 0.500, which is clearly bigger than 0.450 and 0.405. Don\'t be fooled by more digits — 0.405 < 0.45 < 0.5!'
+  },
+
+  // --- Fractions ---
+  {
+    id:12, subject:'math', topic:'Multiplying Fractions', difficulty:2,
+    question:'What is 3/4 × 2/5?',
+    options:['5/9','6/20','3/10','1/5'],
+    answer:2,
+    explanation:'Multiply numerators: 3 × 2 = 6. Multiply denominators: 4 × 5 = 20. Result: 6/20. Simplify: GCF(6,20) = 2, so 6/20 = 3/10. When multiplying fractions: multiply straight across, then simplify. 3/10 means 3 out of every 10 equal parts.'
+  },
+  {
+    id:13, subject:'math', topic:'Multiplying Fractions', difficulty:2,
+    question:'A recipe calls for 2/3 cup of sugar. If you want to make 3/4 of the recipe, how much sugar do you need?',
+    options:['1/2 cup','5/12 cup','1/4 cup','3/4 cup'],
+    answer:0,
+    explanation:'2/3 × 3/4: Multiply numerators: 2 × 3 = 6. Multiply denominators: 3 × 4 = 12. Result: 6/12 = 1/2 cup. You can also cross-cancel first: (2/3) × (3/4) = (2×3)/(3×4) — the 3s cancel! = 2/4 = 1/2 cup. ✓'
+  },
+  {
+    id:14, subject:'math', topic:'Dividing Fractions', difficulty:3,
+    question:'What is 4 ÷ 1/3?',
+    options:['4/3','12','1 1/3','4/12'],
+    answer:1,
+    explanation:'To divide by a fraction, multiply by its RECIPROCAL (flip it): 4 ÷ 1/3 = 4 × 3/1 = 12. Think of it this way: how many 1/3 pieces fit in 4 whole units? 3 pieces fit in each 1, so 3 × 4 = 12 pieces total. Dividing by a fraction always gives a LARGER result!'
+  },
+  {
+    id:15, subject:'math', topic:'Mixed Number Operations', difficulty:3,
+    question:'What is 2 3/4 + 1 2/3?',
+    options:['3 5/7','4 5/12','4 7/12','3 17/12'],
+    answer:2,
+    explanation:'Convert to improper fractions: 2 3/4 = 11/4; 1 2/3 = 5/3. Common denominator of 4 and 3 is 12. 11/4 = 33/12; 5/3 = 20/12. Sum: 53/12 = 4 5/12. Check: 2 + 1 = 3 (whole numbers), 3/4 + 2/3 = 9/12 + 8/12 = 17/12 = 1 5/12. Total: 3 + 1 5/12 = 4 5/12. ✓'
+  },
+  {
+    id:16, subject:'math', topic:'Fractions & Decimals', difficulty:2,
+    question:'Which fraction is equivalent to 0.625?',
+    options:['5/8','6/25','5/6','3/5'],
+    answer:0,
+    explanation:'0.625 = 625/1000. Simplify: GCF(625, 1000) = 125. 625÷125=5, 1000÷125=8. So 0.625 = 5/8. Verify: 5 ÷ 8 = 0.625. ✓ Key fraction-decimal equivalents to memorize: 1/4=0.25, 1/2=0.5, 3/4=0.75, 1/8=0.125, 3/8=0.375, 5/8=0.625, 7/8=0.875.'
+  },
+
+  // --- Order of Operations ---
+  {
+    id:17, subject:'math', topic:'Order of Operations', difficulty:2,
+    question:'What is (8 + 4) × 3 − 6 ÷ 2?',
+    options:['30','33','15','27'],
+    answer:1,
+    explanation:'PEMDAS: Parentheses first: (8+4) = 12. Now: 12 × 3 − 6 ÷ 2. Multiplication and Division left to right: 12 × 3 = 36, then 6 ÷ 2 = 3. Finally Addition/Subtraction: 36 − 3 = 33. Remember: Please Excuse My Dear Aunt Sally = Parentheses, Exponents, Multiply/Divide, Add/Subtract.'
+  },
+  {
+    id:18, subject:'math', topic:'Order of Operations', difficulty:3,
+    question:'What is 5 + 3 × (12 − 4) ÷ 6?',
+    options:['5','8','9','4'],
+    answer:2,
+    explanation:'PEMDAS: Parentheses: (12−4) = 8. Now: 5 + 3 × 8 ÷ 6. Multiply/Divide left to right: 3 × 8 = 24, then 24 ÷ 6 = 4. Add: 5 + 4 = 9. A common mistake is doing all operations left to right — always respect the order: parentheses first, then × and ÷ (left to right), then + and − (left to right).'
+  },
+  {
+    id:19, subject:'math', topic:'Order of Operations', difficulty:2,
+    question:'What is 2³ + 4 × 5?',
+    options:['28','60','2,000','102'],
+    answer:0,
+    explanation:'PEMDAS: Exponents first: 2³ = 8. Then multiplication: 4 × 5 = 20. Finally addition: 8 + 20 = 28. 2³ means 2 × 2 × 2 = 8, NOT 2 × 3 = 6. Exponents come before multiplication, so evaluate them early!'
+  },
+
+  // --- Volume ---
+  {
+    id:20, subject:'math', topic:'Volume', difficulty:1,
+    question:'A rectangular box is 5 cm long, 4 cm wide, and 3 cm tall. What is its volume?',
+    options:['24 cm³','47 cm³','60 cm³','12 cm³'],
+    answer:2,
+    explanation:'Volume = length × width × height = 5 × 4 × 3 = 60 cubic centimeters (cm³). Volume is always measured in CUBIC units (cm³, in³, ft³). Think of it as counting how many 1-cm cubes fit inside the box. 5 × 4 = 20 cubes in one layer, × 3 layers = 60 cubes total.'
+  },
+  {
+    id:21, subject:'math', topic:'Volume', difficulty:2,
+    question:'A fish tank has a volume of 120 cubic feet. Its base is 6 feet long and 4 feet wide. What is its height?',
+    options:['4 ft','5 ft','6 ft','7 ft'],
+    answer:1,
+    explanation:'V = l × w × h → 120 = 6 × 4 × h → 120 = 24h → h = 120 ÷ 24 = 5 feet. When you know volume and two dimensions, divide: V ÷ (l × w) = h. Check: 6 × 4 × 5 = 120. ✓'
+  },
+  {
+    id:22, subject:'math', topic:'Volume', difficulty:3,
+    question:'Two boxes are stacked. Box A is 8 cm × 6 cm × 4 cm. Box B is 5 cm × 5 cm × 5 cm. What is the total volume?',
+    options:['192 cm³','317 cm³','165 cm³','432 cm³'],
+    answer:1,
+    explanation:'Box A: 8 × 6 × 4 = 192 cm³. Box B: 5 × 5 × 5 = 125 cm³. Total: 192 + 125 = 317 cm³. When shapes are combined, calculate each volume separately and add them together. This is called "composite volume."'
+  },
+
+  // --- Coordinate Planes ---
+  {
+    id:23, subject:'math', topic:'Coordinate Planes', difficulty:1,
+    question:'What are the coordinates of a point that is 3 units to the right of the origin and 4 units up?',
+    options:['(4, 3)','(3, 4)','(-3, 4)','(3, -4)'],
+    answer:1,
+    explanation:'Coordinates are written as (x, y). x = horizontal distance (right = positive), y = vertical distance (up = positive). 3 units right = x of 3; 4 units up = y of 4. Coordinates: (3, 4). Remember: "x comes before y" just like the alphabet, and "run before you rise" (go right before going up).'
+  },
+  {
+    id:24, subject:'math', topic:'Coordinate Planes', difficulty:2,
+    question:'On a coordinate grid, a rectangle has corners at (1,1), (5,1), (5,4), and (1,4). What is the area of the rectangle?',
+    options:['8 sq units','12 sq units','16 sq units','20 sq units'],
+    answer:1,
+    explanation:'Width = distance from x=1 to x=5 = 4 units. Height = distance from y=1 to y=4 = 3 units. Area = 4 × 3 = 12 square units. On a coordinate plane, you can find side lengths by subtracting coordinates: width = |5−1| = 4, height = |4−1| = 3.'
+  },
+
+  // --- Algebraic Expressions ---
+  {
+    id:25, subject:'math', topic:'Algebraic Expressions', difficulty:2,
+    question:'What is the value of 3n + 5 when n = 4?',
+    options:['32','17','14','12'],
+    answer:1,
+    explanation:'Substitute n = 4 into the expression: 3(4) + 5 = 12 + 5 = 17. PEMDAS: multiplication before addition, so 3 × 4 = 12 first, then add 5. "3n" means 3 times n. Substitution is the key skill — replace the variable with its value and evaluate.'
+  },
+  {
+    id:26, subject:'math', topic:'Algebraic Expressions', difficulty:2,
+    question:'Solve for n: 3n + 5 = 20',
+    options:['n = 5','n = 6','n = 8','n = 4'],
+    answer:0,
+    explanation:'Work backwards using inverse operations: 3n + 5 = 20. Subtract 5 from both sides: 3n = 15. Divide both sides by 3: n = 5. Check: 3(5) + 5 = 15 + 5 = 20. ✓ Solving equations: use INVERSE operations (addition ↔ subtraction, multiplication ↔ division) to isolate the variable.'
+  },
+  {
+    id:27, subject:'math', topic:'Algebraic Expressions', difficulty:3,
+    question:'Which expression represents "7 less than 4 times a number k"?',
+    options:['7 − 4k','4k − 7','4(k − 7)','7k − 4'],
+    answer:1,
+    explanation:'"4 times a number k" = 4k. "7 less than 4k" means subtract 7 from 4k = 4k − 7. Watch out: "less than" is tricky — "7 less than 4k" is 4k − 7, NOT 7 − 4k. Order matters in subtraction! "7 fewer than" always means subtract 7 from the other quantity.'
+  },
+
+  // --- Powers of 10 ---
+  {
+    id:28, subject:'math', topic:'Powers of 10', difficulty:1,
+    question:'What is 10³?',
+    options:['30','1,000','300','10,000'],
+    answer:1,
+    explanation:'10³ = 10 × 10 × 10 = 1,000. The exponent tells you how many times to multiply 10 by itself. Pattern: 10¹=10, 10²=100, 10³=1,000, 10⁴=10,000. Notice: the exponent tells you how many zeros follow the 1! This is why our number system is called "base 10."'
+  },
+  {
+    id:29, subject:'math', topic:'Powers of 10', difficulty:2,
+    question:'What is 4.5 × 10²?',
+    options:['45','450','4,500','0.045'],
+    answer:1,
+    explanation:'10² = 100. 4.5 × 100 = 450. Shortcut: when multiplying by 10ⁿ, move the decimal point n places to the RIGHT. 4.5 × 10² = move decimal 2 places right: 4.5 → 45.0 → 450. Dividing by 10ⁿ moves the decimal LEFT.'
+  },
+
+  // --- Unit Conversion ---
+  {
+    id:30, subject:'math', topic:'Unit Conversion', difficulty:1,
+    question:'How many meters are in 3.5 kilometers?',
+    options:['350 m','3,500 m','35 m','35,000 m'],
+    answer:1,
+    explanation:'1 kilometer = 1,000 meters. So 3.5 km = 3.5 × 1,000 = 3,500 meters. The prefix "kilo" always means 1,000. Other metric prefixes: centi- = 1/100, milli- = 1/1,000. To convert larger units to smaller units, MULTIPLY (more small units are needed).'
+  },
+  {
+    id:31, subject:'math', topic:'Unit Conversion', difficulty:2,
+    question:'A swimming pool holds 5,000 liters of water. How many kiloliters is that?',
+    options:['50 kL','500 kL','5 kL','0.5 kL'],
+    answer:2,
+    explanation:'1 kiloliter = 1,000 liters. So 5,000 L = 5,000 ÷ 1,000 = 5 kiloliters. Converting from smaller to larger units → DIVIDE. 5,000 ÷ 1,000 = 5 kL. Think: if 1 kL = 1,000 L, then 5,000 L = 5 groups of 1,000 = 5 kL.'
+  },
+
+  // --- Prime, Composite, GCF, LCM ---
+  {
+    id:32, subject:'math', topic:'Prime & Composite Numbers', difficulty:1,
+    question:'Which number is PRIME?',
+    options:['21','27','29','33'],
+    answer:2,
+    explanation:'A prime number has EXACTLY 2 factors: 1 and itself. Check 29: is it divisible by 2 (no, odd), 3 (2+9=11, not divisible by 3), 5 (doesn\'t end in 0 or 5 — wait, 9≠5 or 0), 7 (29÷7≈4.1, no). 29 is prime! 21=3×7, 27=3×9, 33=3×11. Remember: 1 is NOT prime (it has only 1 factor).'
+  },
+  {
+    id:33, subject:'math', topic:'GCF and LCM', difficulty:2,
+    question:'What is the Greatest Common Factor (GCF) of 36 and 48?',
+    options:['6','9','12','18'],
+    answer:2,
+    explanation:'Factors of 36: 1,2,3,4,6,9,12,18,36. Factors of 48: 1,2,3,4,6,8,12,16,24,48. Common factors: 1,2,3,4,6,12. The GREATEST is 12. GCF is useful for simplifying fractions. Tip: 36 = 4×9 and 48 = 4×12, so 4 is a common factor. 36 = 12×3 and 48 = 12×4, so 12 is the GCF!'
+  },
+  {
+    id:34, subject:'math', topic:'GCF and LCM', difficulty:2,
+    question:'What is the Least Common Multiple (LCM) of 4 and 6?',
+    options:['12','24','2','10'],
+    answer:0,
+    explanation:'Multiples of 4: 4, 8, 12, 16, 20, 24... Multiples of 6: 6, 12, 18, 24... The LEAST (smallest) common multiple is 12. LCM is useful when adding fractions with different denominators. Formula: LCM(4,6) = 4 × 6 ÷ GCF(4,6) = 24 ÷ 2 = 12. ✓'
+  },
+
+  // --- Mean, Median, Mode, Range ---
+  {
+    id:35, subject:'math', topic:'Mean, Median, Mode, Range', difficulty:2,
+    question:'Five students scored: 72, 85, 90, 85, 68. What is the MEAN (average)?',
+    options:['80','85','82','79'],
+    answer:0,
+    explanation:'Mean = sum ÷ count. Sum: 72+85+90+85+68 = 400. Count: 5 students. Mean = 400 ÷ 5 = 80. The mean represents the "fair share" if all values were equal. Watch out: if scores were 72+85+90+85+68, add carefully: 72+85=157, +90=247, +85=332, +68=400. ÷5 = 80. ✓'
+  },
+  {
+    id:36, subject:'math', topic:'Mean, Median, Mode, Range', difficulty:1,
+    question:'Find the MEDIAN of: 15, 7, 22, 7, 18',
+    options:['7','15','18','22'],
+    answer:1,
+    explanation:'To find the median, FIRST put numbers in order: 7, 7, 15, 18, 22. The MEDIAN is the middle value. With 5 numbers, the 3rd number (7, 7, →15←, 18, 22) is the middle. Median = 15. The median is useful because it\'s not affected by extreme values (outliers) the way the mean is.'
+  },
+  {
+    id:37, subject:'math', topic:'Mean, Median, Mode, Range', difficulty:1,
+    question:'What is the MODE and RANGE of: 3, 7, 7, 2, 9, 3, 7?',
+    options:['Mode=3, Range=7','Mode=7, Range=7','Mode=7, Range=6','Mode=3, Range=6'],
+    answer:1,
+    explanation:'MODE = most frequent value. 7 appears 3 times, 3 appears 2 times, 2 and 9 appear once. Mode = 7. RANGE = greatest − least = 9 − 2 = 7. Range tells you the spread of the data. Remember: mode = most, range = spread (max − min).'
+  },
+  {
+    id:38, subject:'math', topic:'Mean, Median, Mode, Range', difficulty:3,
+    question:'The mean of 4 numbers is 15. Three of the numbers are 12, 18, and 14. What is the fourth number?',
+    options:['14','16','15','17'],
+    answer:1,
+    explanation:'Mean = sum ÷ count → sum = mean × count = 15 × 4 = 60. Sum of known numbers: 12 + 18 + 14 = 44. Fourth number = 60 − 44 = 16. Check: (12+18+14+16) ÷ 4 = 60 ÷ 4 = 15. ✓ When you know the mean, work backwards: total sum = mean × n.'
+  },
+
+  // --- Additional Math ---
+  {
+    id:39, subject:'math', topic:'Multi-digit Multiplication', difficulty:3,
+    question:'What is 125 × 24?',
+    options:['2,800','2,900','3,000','3,100'],
+    answer:2,
+    explanation:'125 × 24 = 125 × 20 + 125 × 4 = 2,500 + 500 = 3,000. A shortcut: 125 × 8 = 1,000, so 125 × 24 = 125 × 8 × 3 = 1,000 × 3 = 3,000. Knowing that 125 × 8 = 1,000 is a very useful math fact!'
+  },
+  {
+    id:40, subject:'math', topic:'Decimal Operations', difficulty:3,
+    question:'If a book costs $12.75 and you buy 6 copies, how much do you pay in total?',
+    options:['$75.50','$76.50','$77.50','$78.50'],
+    answer:1,
+    explanation:'12.75 × 6: Think of 12.75 as 12 + 0.75. 12 × 6 = 72. 0.75 × 6 = 4.50. Total: 72 + 4.50 = $76.50. Or: 1275 × 6 = 7,650. Move decimal 2 places left: $76.50. Always check with estimation: $13 × 6 = $78, so $76.50 is reasonable.'
+  },
+  {
+    id:41, subject:'math', topic:'Fractions', difficulty:3,
+    question:'What is 3/4 ÷ 3/8?',
+    options:['9/32','1/2','2','9/8'],
+    answer:2,
+    explanation:'Dividing fractions: multiply by the reciprocal. 3/4 ÷ 3/8 = 3/4 × 8/3. Cross-cancel: 3s cancel and 4 and 8 share factor 4. (3/4) × (8/3) = (1/1) × (2/1) = 2. Check: does 3/8 fit into 3/4 two times? 2 × 3/8 = 6/8 = 3/4. ✓'
+  },
+  {
+    id:42, subject:'math', topic:'GCF and LCM', difficulty:3,
+    question:'Two buses leave the station at 8:00 AM. Bus A leaves every 15 minutes, Bus B every 12 minutes. When will they both leave at the same time again?',
+    options:['8:36 AM','8:48 AM','9:00 AM','9:12 AM'],
+    answer:2,
+    explanation:'Find LCM(15, 12). Multiples of 15: 15, 30, 45, 60... Multiples of 12: 12, 24, 36, 48, 60... LCM = 60 minutes. 8:00 AM + 60 minutes = 9:00 AM. LCM is used in real life whenever you need to find when repeating events coincide — like bus schedules, TV show repeats, or tile patterns!'
+  },
+
+  // ===================== READING (38) =====================
+
+  // --- Advanced Vocabulary & Word Roots ---
+  {
+    id:43, subject:'reading', topic:'Word Roots', difficulty:2,
+    question:'The word "photograph" contains the Greek root "photo" meaning light and "graph" meaning write. Based on this, what does "photosynthesis" most likely involve?',
+    options:['Writing about chemistry','Using light to create something','Taking pictures of plants','Drawing with chemicals'],
+    answer:1,
+    explanation:'"Photo" = light; "synthesis" (from Greek "syntithenai") = to put together or make. Photosynthesis means using light to make (food/energy). Knowing Greek and Latin roots helps you decode unfamiliar words. Other "photo" words: photograph (writing with light), photovoltaic (electricity from light).'
+  },
+  {
+    id:44, subject:'reading', topic:'Word Roots', difficulty:2,
+    question:'The Latin root "port" means "to carry." Which word means "a thing that cannot be carried across" (from Latin "im" = not)?',
+    options:['important','importer','impassable','impossible'],
+    answer:0,
+    explanation:'Im- (not) + port (carry) + ant = originally "not able to be carried past/across." Today "important" means significant, but etymologically connects to something that cannot be moved past. Other "port" words: transport (carry across), export (carry out), portable (able to be carried). Understanding roots builds vocabulary powerfully!'
+  },
+  {
+    id:45, subject:'reading', topic:'Advanced Vocabulary', difficulty:2,
+    question:'In the sentence "The scientist\'s meticulous attention to detail ensured accurate results," what does "meticulous" mean?',
+    options:['careless and hasty','very careful and precise','creative and imaginative','skeptical and doubtful'],
+    answer:1,
+    explanation:'"Meticulous" comes from Latin "metus" (fear) — originally meaning "fearful" (of making mistakes), it evolved to mean extremely careful and precise. Context clues: "meticulous attention to detail" and "accurate results" both suggest carefulness. Synonyms: precise, thorough, painstaking. Antonym: careless.'
+  },
+  {
+    id:46, subject:'reading', topic:'Advanced Vocabulary', difficulty:3,
+    question:'Which word is most nearly OPPOSITE in meaning to "benevolent"?',
+    options:['generous','charitable','malevolent','helpful'],
+    answer:2,
+    explanation:'"Benevolent" (bene = good + volent = wishing) means wishing good for others; kind and generous. Its antonym is "malevolent" (male = bad + volent = wishing), meaning wishing harm to others; evil. Generous, charitable, and helpful are all synonyms of benevolent. Knowing Latin roots "bene" and "male" helps with many words!'
+  },
+  {
+    id:47, subject:'reading', topic:'Advanced Vocabulary', difficulty:2,
+    question:'The word "audible" comes from the Latin "audire" meaning to hear. What does "inaudible" mean?',
+    options:['very loud','cannot be heard','easy to listen to','played by an audience'],
+    answer:1,
+    explanation:'In- (prefix meaning "not") + audible (able to be heard) = not able to be heard. The prefix "in-" negates the base word. Other "aud" words: audience (people who hear), auditorium (place for hearing), audiobook (book to hear). Prefix "in-" also appears in: invisible (not visible), incredible (not credible).'
+  },
+
+  // --- Passage: Marie Curie (Biography) ---
+  {
+    id:48, subject:'reading', topic:'Key Details', difficulty:1,
+    passage:'Marie Curie was born in Warsaw, Poland, in 1867. She became one of history\'s greatest scientists, winning the Nobel Prize not once, but twice — in Physics (1903) and Chemistry (1911). She discovered two new elements: polonium (named after her homeland) and radium. At a time when women were not allowed to attend university in Poland, she secretly joined a "floating university," an underground school that moved locations to avoid the authorities. She later moved to Paris, where she earned degrees in physics and mathematics despite facing discrimination as both a woman and a foreigner. Her work on radioactivity opened entirely new fields of science and medicine.',
+    question:'Why did Marie Curie name the element "polonium"?',
+    options:['After the Polish word for radiation','After her homeland, Poland','After a French scientist named Poloni','After the city of Pol in Russia'],
+    answer:1,
+    explanation:'The passage directly states polonium was "named after her homeland" Poland. Details questions require finding specific information in the text. Notice the passage says she was born in Warsaw, Poland — connecting her homeland to the element\'s name. This is a straightforward detail question — always look for the exact words in the passage.'
+  },
+  {
+    id:49, subject:'reading', topic:'Inference', difficulty:2,
+    passage:'Marie Curie was born in Warsaw, Poland, in 1867. She became one of history\'s greatest scientists, winning the Nobel Prize not once, but twice — in Physics (1903) and Chemistry (1911). She discovered two new elements: polonium (named after her homeland) and radium. At a time when women were not allowed to attend university in Poland, she secretly joined a "floating university," an underground school that moved locations to avoid the authorities. She later moved to Paris, where she earned degrees in physics and mathematics despite facing discrimination as both a woman and a foreigner. Her work on radioactivity opened entirely new fields of science and medicine.',
+    question:'What can you INFER about the "floating university"?',
+    options:['It was a university on a boat','It was illegal and had to hide from the government','It was Marie\'s favorite school','It only taught physics and chemistry'],
+    answer:1,
+    explanation:'The passage says the floating university "moved locations to avoid the authorities" — if it had to hide, it must have been illegal. An inference combines text clues with reasoning: "secretly," "underground," and "avoid authorities" all suggest something forbidden. This is not directly stated but strongly implied.'
+  },
+  {
+    id:50, subject:'reading', topic:"Author's Purpose & Argument", difficulty:2,
+    passage:'Marie Curie was born in Warsaw, Poland, in 1867. She became one of history\'s greatest scientists, winning the Nobel Prize not once, but twice — in Physics (1903) and Chemistry (1911). She discovered two new elements: polonium (named after her homeland) and radium. At a time when women were not allowed to attend university in Poland, she secretly joined a "floating university," an underground school that moved locations to avoid the authorities. She later moved to Paris, where she earned degrees in physics and mathematics despite facing discrimination as both a woman and a foreigner. Her work on radioactivity opened entirely new fields of science and medicine.',
+    question:'What is the MAIN ARGUMENT the author makes about Marie Curie?',
+    options:[
+      'Marie Curie should have stayed in Poland.',
+      'Marie Curie overcame remarkable obstacles to become a groundbreaking scientist.',
+      'The Nobel Prize is the highest honor in science.',
+      'Women are naturally better at chemistry than physics.'
+    ],
+    answer:1,
+    explanation:'The author highlights both her achievements (two Nobel Prizes, two element discoveries) AND the obstacles she overcame (banned from university, discrimination as woman and foreigner). Together, these details support the argument that she was exceptional despite great barriers. Reading for an author\'s argument means identifying what claim they are making and how details support it.'
+  },
+  {
+    id:51, subject:'reading', topic:'Textual Evidence', difficulty:3,
+    passage:'Marie Curie was born in Warsaw, Poland, in 1867. She became one of history\'s greatest scientists, winning the Nobel Prize not once, but twice — in Physics (1903) and Chemistry (1911). She discovered two new elements: polonium (named after her homeland) and radium. At a time when women were not allowed to attend university in Poland, she secretly joined a "floating university," an underground school that moved locations to avoid the authorities. She later moved to Paris, where she earned degrees in physics and mathematics despite facing discrimination as both a woman and a foreigner. Her work on radioactivity opened entirely new fields of science and medicine.',
+    question:'Which piece of evidence BEST supports the idea that Marie Curie faced significant gender discrimination?',
+    options:[
+      '"She discovered two new elements: polonium and radium."',
+      '"women were not allowed to attend university in Poland"',
+      '"Her work on radioactivity opened entirely new fields."',
+      '"She was born in Warsaw, Poland, in 1867."'
+    ],
+    answer:1,
+    explanation:'Textual evidence must DIRECTLY support the claim. The claim is about gender discrimination. Option B — "women were not allowed to attend university in Poland" — directly shows discrimination based on gender. Option A is about scientific achievement, C about impact, D about her birth. Always select the quote that most directly addresses the specific claim.'
+  },
+
+  // --- Passage: The Amazon Rainforest ---
+  {
+    id:52, subject:'reading', topic:'Main Idea', difficulty:2,
+    passage:'The Amazon rainforest, often called "the lungs of the Earth," covers about 5.5 million square kilometers across nine South American countries. It produces roughly 20% of the world\'s oxygen and is home to an estimated 10% of all species on Earth. Scientists believe millions of species have yet to be discovered. Despite its critical importance, the Amazon faces severe threats. Each year, thousands of square kilometers are cleared for farming, cattle ranching, and mining. This deforestation releases stored carbon dioxide into the atmosphere, worsening global climate change. Environmentalists argue that saving the Amazon is not just a regional concern — it is a matter of global survival.',
+    question:'Which sentence BEST captures the main idea of this passage?',
+    options:[
+      'The Amazon rainforest covers 5.5 million square kilometers.',
+      'Millions of species in the Amazon have not yet been discovered.',
+      'The Amazon rainforest is critically important to the world and is under serious threat.',
+      'Deforestation always releases carbon dioxide.'
+    ],
+    answer:2,
+    explanation:'The main idea must cover the WHOLE passage. The passage is split between the Amazon\'s importance (oxygen, species) AND the threats it faces (deforestation, climate). Option C covers both parts. Options A, B, and D are specific details from the passage, not the overall main idea. A good main idea is broad enough to include all major points.'
+  },
+  {
+    id:53, subject:'reading', topic:'Synthesizing Information', difficulty:3,
+    passage:'The Amazon rainforest, often called "the lungs of the Earth," covers about 5.5 million square kilometers across nine South American countries. It produces roughly 20% of the world\'s oxygen and is home to an estimated 10% of all species on Earth. Scientists believe millions of species have yet to be discovered. Despite its critical importance, the Amazon faces severe threats. Each year, thousands of square kilometers are cleared for farming, cattle ranching, and mining. This deforestation releases stored carbon dioxide into the atmosphere, worsening global climate change. Environmentalists argue that saving the Amazon is not just a regional concern — it is a matter of global survival.',
+    question:'How does the phrase "the lungs of the Earth" connect to the information in the passage?',
+    options:[
+      'It shows the Amazon is shaped like a pair of lungs.',
+      'It refers to the oxygen the Amazon produces, just as lungs produce oxygen for the body.',
+      'It means the Amazon absorbs water like lungs absorb air.',
+      'It is just a nickname with no literal meaning.'
+    ],
+    answer:1,
+    explanation:'The passage says the Amazon "produces roughly 20% of the world\'s oxygen." This connects directly to the metaphor: lungs produce oxygen for the body; the Amazon produces oxygen for the Earth. Synthesizing means connecting figurative language to supporting facts in the text. The metaphor and the statistic reinforce each other.'
+  },
+  {
+    id:54, subject:'reading', topic:'Figurative Language in Context', difficulty:2,
+    passage:'The Amazon rainforest, often called "the lungs of the Earth," covers about 5.5 million square kilometers across nine South American countries. It produces roughly 20% of the world\'s oxygen and is home to an estimated 10% of all species on Earth. Scientists believe millions of species have yet to be discovered. Despite its critical importance, the Amazon faces severe threats. Each year, thousands of square kilometers are cleared for farming, cattle ranching, and mining. This deforestation releases stored carbon dioxide into the atmosphere, worsening global climate change. Environmentalists argue that saving the Amazon is not just a regional concern — it is a matter of global survival.',
+    question:'The phrase "the lungs of the Earth" applied to the Amazon is an example of which literary device?',
+    options:['Simile','Metaphor','Alliteration','Personification'],
+    answer:1,
+    explanation:'A METAPHOR directly calls one thing another thing without using "like" or "as." The Amazon IS called "the lungs of the Earth" — it doesn’t say the Amazon is LIKE lungs. This metaphor works because lungs provide oxygen to the body, just as the Amazon provides oxygen to the planet. If it said "the Amazon is like the lungs of the Earth," that would be a simile. Metaphors create more vivid, immediate connections.'
+  },
+  {
+    id:55, subject:'reading', topic:'Author\'s Evidence', difficulty:3,
+    passage:'The Amazon rainforest, often called "the lungs of the Earth," covers about 5.5 million square kilometers across nine South American countries. It produces roughly 20% of the world\'s oxygen and is home to an estimated 10% of all species on Earth. Scientists believe millions of species have yet to be discovered. Despite its critical importance, the Amazon faces severe threats. Each year, thousands of square kilometers are cleared for farming, cattle ranching, and mining. This deforestation releases stored carbon dioxide into the atmosphere, worsening global climate change. Environmentalists argue that saving the Amazon is not just a regional concern — it is a matter of global survival.',
+    question:'What type of evidence does the author use to support the Amazon\'s importance?',
+    options:['Personal stories and interviews','Statistics and scientific facts','Expert opinions only','Historical examples'],
+    answer:1,
+    explanation:'The author uses statistics (5.5 million sq km, 20% of oxygen, 10% of species) and scientific facts (deforestation releases CO₂) to build the argument. This is called "evidence-based writing." Recognizing evidence types is important for evaluating how well an author supports their claims. Statistics make arguments more convincing and verifiable.'
+  },
+
+  // --- Passage: Two Texts on Technology ---
+  {
+    id:56, subject:'reading', topic:'Comparing Texts', difficulty:3,
+    passage:'TEXT A: Smartphones have transformed education. Students can access vast libraries of information instantly, collaborate with peers worldwide, and learn through interactive apps. Research shows that students who use educational technology show improved engagement and test scores.\n\nTEXT B: While smartphones offer some benefits, overreliance on them may harm learning. Studies indicate that students who reach for their phones during study sessions retain 20% less information. True learning requires focused, distraction-free attention that smartphones actively undermine.',
+    question:'How do Text A and Text B DIFFER in their approach to the same topic?',
+    options:[
+      'Text A is about phones; Text B is about computers.',
+      'Text A focuses only on social media; Text B focuses on games.',
+      'Text A emphasizes benefits of smartphones in education; Text B emphasizes potential harm.',
+      'Both texts agree that smartphones are harmful.'
+    ],
+    answer:2,
+    explanation:'Comparing texts means identifying where they agree and disagree. Both texts are about smartphones in education (same topic), but Text A argues they help (benefits: information, collaboration, engagement) while Text B argues they harm (distraction, 20% less retention). This is a CONTRAST — same subject, opposite perspectives. Always identify the central claim of each text when comparing.'
+  },
+  {
+    id:57, subject:'reading', topic:'Comparing Texts', difficulty:3,
+    passage:'TEXT A: Smartphones have transformed education. Students can access vast libraries of information instantly, collaborate with peers worldwide, and learn through interactive apps. Research shows that students who use educational technology show improved engagement and test scores.\n\nTEXT B: While smartphones offer some benefits, overreliance on them may harm learning. Studies indicate that students who reach for their phones during study sessions retain 20% less information. True learning requires focused, distraction-free attention that smartphones actively undermine.',
+    question:'Both texts reference RESEARCH or STUDIES. How do they use this evidence differently?',
+    options:[
+      'Text A uses research to show improvement; Text B uses studies to show harm.',
+      'Only Text A uses real research; Text B makes up statistics.',
+      'Both texts use research to show benefits.',
+      'Text B uses more reliable studies than Text A.'
+    ],
+    answer:0,
+    explanation:'Text A: "Research shows improved engagement and test scores" (positive evidence). Text B: "Studies indicate 20% less retention" (negative evidence). Both use research/studies but to support OPPOSITE conclusions. This shows how statistics can be used to support very different arguments — always consider the source and context of data.'
+  },
+
+  // --- Theme vs. Main Idea ---
+  {
+    id:58, subject:'reading', topic:'Theme vs. Main Idea', difficulty:3,
+    question:'A story tells how a girl loses her best friend necklace and spends days searching, only to find it in her own pocket. She realizes she\'d been too focused on the search to enjoy time with friends. What is the THEME?',
+    options:[
+      'You should always check your pockets first.',
+      'Necklaces are easy to lose.',
+      'Sometimes we overlook what is right in front of us while chasing what we already have.',
+      'Searching for lost items takes too long.'
+    ],
+    answer:2,
+    explanation:'THEME is the universal life lesson — not the plot, but the deeper meaning that applies to many situations. Option C captures the theme: we miss what\'s important (friends, present moments) while desperately searching for something we already have. This is different from the main idea (what happens in the story). Themes should be stated as broad life lessons, not plot summaries.'
+  },
+  {
+    id:59, subject:'reading', topic:'Narrator Reliability', difficulty:3,
+    question:'In a story, the narrator says: "I won the race fair and square. Sure, I took a shortcut, but everyone does that." Should readers trust this narrator\'s claim that he won "fair and square"? Why?',
+    options:[
+      'Yes, because narrators always tell the truth.',
+      'No, because admitting to a shortcut contradicts "fair and square."',
+      'Yes, because the race was officially recorded.',
+      'No, because he didn\'t actually win.'
+    ],
+    answer:1,
+    explanation:'An UNRELIABLE NARRATOR is one whose account cannot be fully trusted. This narrator admits to taking a shortcut (which is cheating) while claiming "fair and square" (no cheating). These contradict each other! The justification "everyone does that" is a rationalization. Readers must read between the lines and notice when a narrator\'s own words contradict their claims.'
+  },
+  {
+    id:60, subject:'reading', topic:'Inference', difficulty:2,
+    question:'A passage says: "The coach paced back and forth, checking her watch every few minutes. The players watched her silently." What can you infer?',
+    options:[
+      'The coach is angry at the players.',
+      'The coach is relaxed and confident.',
+      'The coach is anxious or worried about something.',
+      'The players are bored.'
+    ],
+    answer:2,
+    explanation:'Clues: pacing = restlessness/anxiety, checking watch repeatedly = impatience or worry, players watching silently = tense atmosphere. Together, these details suggest the coach is anxious or worried. This is characterization through action — authors show feelings through behavior rather than stating them directly. "Show, don\'t tell" is a key literary technique.'
+  },
+  {
+    id:61, subject:'reading', topic:'Figurative Language', difficulty:2,
+    question:'"The news hit him like a freight train." This sentence uses which literary device?',
+    options:['Personification','Metaphor','Simile','Alliteration'],
+    answer:2,
+    explanation:'A SIMILE compares two unlike things using "like" or "as." "The news hit him LIKE a freight train" — comparing the emotional impact of news to being physically struck by a train. This creates a vivid image of the sudden, powerful shock. If it said "The news was a freight train," that would be a metaphor (no "like" or "as").'
+  },
+  {
+    id:62, subject:'reading', topic:'Point of View', difficulty:2,
+    question:'A story is narrated using "he," "she," and "they," but the narrator seems to know only what ONE character sees, thinks, and feels. What type of narration is this?',
+    options:['First-person','Second-person','Third-person limited','Third-person omniscient'],
+    answer:2,
+    explanation:'THIRD-PERSON LIMITED: uses he/she/they (not I) but only knows ONE character\'s thoughts and feelings — limited to that one perspective. THIRD-PERSON OMNISCIENT: uses he/she/they AND knows ALL characters\' thoughts. FIRST-PERSON: uses "I." The key clue here is "knows only what ONE character sees" = LIMITED.'
+  },
+  {
+    id:63, subject:'reading', topic:'Text Structure', difficulty:2,
+    question:'A science article discusses ocean pollution, then its causes (plastic waste, runoff), then its effects (coral bleaching, species death), then solutions. What text structure does this follow?',
+    options:['Compare and Contrast','Chronological Order','Cause and Effect','Problem and Solution'],
+    answer:3,
+    explanation:'PROBLEM AND SOLUTION text structure: introduces a problem (ocean pollution) then explores solutions. It may also include causes and effects. This differs from CAUSE AND EFFECT (which focuses on why things happen and what results) in that problem/solution emphasizes actionable fixes. Text structure clue words for problem/solution: "the issue is," "one solution," "to solve this."'
+  },
+  {
+    id:64, subject:'reading', topic:'Vocabulary in Context', difficulty:2,
+    question:'The passage states: "Despite the arduous journey through the mountains, the explorers remained determined." What does "arduous" mean?',
+    options:['short and easy','dangerous and illegal','very difficult and tiring','scenic and beautiful'],
+    answer:2,
+    explanation:'Context clue: an "arduous journey through the mountains" that still required the explorers to "remain determined" — if the journey were easy, determination wouldn\'t be needed. "Arduous" means extremely difficult and tiring. Synonyms: grueling, strenuous, laborious. Antonyms: easy, effortless. The contrast with "remained determined" is a strong context clue.'
+  },
+  {
+    id:65, subject:'reading', topic:'Summarizing', difficulty:2,
+    question:'After reading a 5-paragraph science article about climate change, which summary is BEST?',
+    options:[
+      '"Climate change is a big problem."',
+      '"The article talked about temperature, ice, weather, plants, and animals."',
+      '"Climate change, driven by greenhouse gas emissions, is causing rising temperatures, melting ice caps, and disrupted ecosystems, threatening both wildlife and human communities."',
+      '"I think climate change is very scary and we should all be worried about it."'
+    ],
+    answer:2,
+    explanation:'A strong summary: (1) includes the main idea, (2) mentions key supporting details, (3) is in your own words, (4) is objective (no personal opinion). Option A is too vague. Option B is just a list of topics, not a coherent summary. Option D includes personal opinion (not a summary). Option C is comprehensive, specific, and objective. ✓'
+  },
+  {
+    id:66, subject:'reading', topic:'Figurative Language', difficulty:2,
+    question:'"The leaves whispered secrets as the wind moved through them." What literary device is used?',
+    options:['Hyperbole','Simile','Alliteration','Personification'],
+    answer:3,
+    explanation:'PERSONIFICATION gives human qualities to non-human things. Leaves cannot actually whisper or keep secrets — these are human actions. By saying leaves "whispered secrets," the author gives them human qualities, creating a mysterious and atmospheric feeling. This is different from a metaphor (direct comparison) or simile (comparison with like/as).'
+  },
+  {
+    id:67, subject:'reading', topic:'Fact vs Opinion', difficulty:1,
+    question:'Which statement from a book review is an OPINION?',
+    options:[
+      '"The book was published in 2019."',
+      '"The author was born in London."',
+      '"This is the most captivating adventure story ever written."',
+      '"The main character is a twelve-year-old girl."'
+    ],
+    answer:2,
+    explanation:'"The most captivating adventure story ever written" is an OPINION — it\'s a personal judgment that cannot be proven with facts. Words like "most," "best," "worst," and evaluative adjectives (captivating, boring, wonderful) signal opinions. Options A, B, and D are facts that can be verified by checking the book or records.'
+  },
+  {
+    id:68, subject:'reading', topic:'Plot Structure', difficulty:2,
+    question:'Near the end of a story, conflicts are resolved, characters return home safely, and life returns to normal. This part of the story structure is the:',
+    options:['Exposition','Climax','Rising Action','Resolution/Falling Action'],
+    answer:3,
+    explanation:'The RESOLUTION (also called falling action/denouement) is where conflicts are resolved and the story winds down after the climax. Plot structure: Exposition → Rising Action → CLIMAX → Falling Action → Resolution. The resolution answers the question "what happened after the big moment?" and restores stability (or shows a new normal).'
+  },
+  {
+    id:69, subject:'reading', topic:'Word Roots', difficulty:3,
+    question:'The Greek root "bio" means life, and "logy" means the study of. What does "autobiography" most likely mean?',
+    options:['A study of life forms','A book written by someone else about a person\'s life','A book written by a person about their own life','A scientific study of self'],
+    answer:2,
+    explanation:'"Auto" = self, "bio" = life, "graphy" = writing. Autobiography = self-life-writing = a book written by a person about their OWN life. Compare: "biography" (bio + graphy) = writing about someone\'s life (by another person). "Autobiography" adds "auto" (self) to show the person writes about themselves.'
+  },
+  {
+    id:70, subject:'reading', topic:'Making Inferences', difficulty:3,
+    question:'Read: "Every morning, Elijah made his bed perfectly before doing anything else. He triple-checked his homework, packed his backpack the night before, and always arrived five minutes early." What can you infer about Elijah\'s CHARACTER?',
+    options:['He is lazy and disorganized.','He is very organized and conscientious.','He is fearful and anxious.','He is competitive and sporty.'],
+    answer:1,
+    explanation:'Evidence: perfect bed (orderly), triple-checking homework (thoroughness), packing ahead (planning), arriving early (punctuality). These multiple character details collectively show Elijah is very organized and conscientious (careful and diligent). Characterization through actions/habits is called "indirect characterization" — the author shows who a character is through what they DO.'
+  },
+  {
+    id:71, subject:'reading', topic:'Advanced Vocabulary', difficulty:3,
+    question:'In "The council\'s decision was unanimous — every member voted in favor," what does "unanimous" mean?',
+    options:['controversial and debated','agreed upon by everyone','made by the chairman alone','reached by a majority vote'],
+    answer:1,
+    explanation:'"Unanimous" (from Latin "unus" = one + "animus" = mind) means everyone is of ONE MIND — complete agreement with no dissent. Context clue: "every member voted in favor" confirms 100% agreement = unanimous. Synonyms: undivided, united. Antonym: divided, split. The prefix "un-" here comes from Latin "unus" (one), not the negating prefix "un-"!'
+  },
+  {
+    id:72, subject:'reading', topic:'Figurative Language', difficulty:3,
+    question:'Which sentence contains an example of IRONY?',
+    options:[
+      '"The sun rose brightly over the horizon."',
+      '"The fire station burned down."',
+      '"She sang as beautifully as a songbird."',
+      '"The rain fell in heavy sheets all afternoon."'
+    ],
+    answer:1,
+    explanation:'IRONY occurs when the opposite of what is expected happens. A fire station — a place that protects against fires — burning down is deeply ironic. This is called SITUATIONAL IRONY. Compare: VERBAL IRONY is saying the opposite of what you mean (sarcasm). DRAMATIC IRONY is when the audience knows something characters don\'t. "The fire station burned" is a classic example of situational irony.'
+  },
+  {
+    id:73, subject:'reading', topic:'Context Clues', difficulty:2,
+    question:'In "The diplomat was known for her tact and diplomacy; she could resolve arguments without offending anyone," what does "tact" most likely mean?',
+    options:['bluntness and directness','the ability to speak many languages','sensitivity and skill in dealing with people','military strategy'],
+    answer:2,
+    explanation:'Context clues: "resolve arguments without offending anyone" tells you what tact DOES. The sentence contrasts tact with a situation where someone WOULD be offended. Tact means sensitivity and skill in dealing with difficult situations or people gracefully. The word "diplomacy" nearby is also a synonym clue — diplomats are known for tact.'
+  },
+  {
+    id:74, subject:'reading', topic:'Inference', difficulty:2,
+    question:'A historical fiction story is set in 1850, mentions steam engines, and characters wear top hats. The characters write letters instead of calling. What can you infer?',
+    options:['The story takes place in the future.','The story takes place before the telephone was invented.','The story takes place in a fantasy world.','The characters are poor.'],
+    answer:1,
+    explanation:'The telephone was invented in 1876. If the story is set in 1850 and characters write letters instead of calling, you can infer telephones don\'t exist yet. Historical context clues (steam engines, top hats, 1850) help situate the story. Using prior knowledge + text details = historical inference. Steam engines were common in the 1840s-1850s Industrial Revolution era.'
+  },
+  {
+    id:75, subject:'reading', topic:'Text Features', difficulty:2,
+    question:'A student is reading a textbook and sees a number "[3]" after a fact. This notation refers to:',
+    options:['a footnote or citation (source reference)','the chapter number','a formula to solve','the page where the next topic starts'],
+    answer:0,
+    explanation:'Superscript numbers in academic texts are CITATIONS or FOOTNOTES — they tell the reader where the fact came from (the source). This is how writers give credit for information and let readers verify facts. In footnotes, [3] would correspond to the 3rd source listed at the bottom of the page or in a bibliography. Recognizing text features shows reading sophistication.'
+  },
+  {
+    id:76, subject:'reading', topic:'Comparing Texts', difficulty:3,
+    question:'Text A is a poem about wolves using vivid metaphors. Text B is a scientific article about wolf behavior. Which statement is TRUE?',
+    options:[
+      'Text A provides more reliable factual information about wolves.',
+      'Text B uses metaphors to make wolves seem more interesting.',
+      'Text A uses language to create emotional impact; Text B uses evidence to inform.',
+      'Both texts have the same purpose and style.'
+    ],
+    answer:2,
+    explanation:'Literary texts (poems, stories) use figurative language, imagery, and emotion to create an experience. Informational texts (scientific articles) use evidence, facts, and data to inform. Text A (poem) = emotional impact through metaphors. Text B (scientific) = evidence-based information. Comparing purposes and styles between texts is a key reading skill at this level.'
+  },
+  {
+    id:77, subject:'reading', topic:'Figurative Language', difficulty:2,
+    question:'"Her smile was the sunrise, chasing away all shadows." This is an example of:',
+    options:['Simile','Metaphor','Hyperbole','Onomatopoeia'],
+    answer:1,
+    explanation:'A METAPHOR says something IS something else without using "like" or "as." Her smile IS the sunrise — a direct comparison. The sunrise chases away darkness, just as her smile chases away sadness (shadows = sadness metaphorically). If it said "Her smile was LIKE the sunrise," it would be a simile. Metaphors create more powerful, immediate connections.'
+  },
+  {
+    id:78, subject:'reading', topic:'Vocabulary in Context', difficulty:3,
+    question:'The passage states: "The professor\'s pedantic lectures often frustrated students — he spent 20 minutes explaining why \'which\' vs \'that\' matters while the core concepts went untaught." What does "pedantic" mean?',
+    options:['engaging and inspiring','overly focused on minor details at the expense of the bigger picture','kind and encouraging','brief and to the point'],
+    answer:1,
+    explanation:'"Pedantic" describes someone who focuses excessively on small, unimportant details (like which vs that) while missing the bigger picture (core concepts). Context clue: spending 20 minutes on a minor grammar point while "core concepts went untaught" perfectly illustrates pedantry. Synonyms: nit-picky, over-precise, fussy about details. Antonym: big-picture thinking.'
+  },
+  {
+    id:79, subject:'reading', topic:'Main Idea', difficulty:2,
+    question:'A passage covers the history of pizza (Italy), how it spread to America, and how it became a global food. What is the MAIN IDEA?',
+    options:[
+      'Pizza is the most popular food in America.',
+      'Pizza originated in Italy.',
+      'Pizza has evolved from an Italian regional food into one of the world\'s most beloved dishes.',
+      'Americans changed pizza by adding different toppings.'
+    ],
+    answer:2,
+    explanation:'The main idea covers the WHOLE passage. This passage moves through three stages: Italian origins → spread to America → global popularity. Option C covers all three stages (Italian origin → beloved worldwide). Options A and D cover only part of the passage. Option B is the first point, not the overall idea. The main idea is the umbrella that all details support.'
+  },
+  {
+    id:80, subject:'reading', topic:'Theme', difficulty:3,
+    question:'In a novel, a scientist creates an AI robot friend because she is lonely. As the robot becomes more human-like, she grows fearful and tries to destroy it. What is the most likely THEME?',
+    options:[
+      'AI robots are dangerous and should be illegal.',
+      'Scientists should not work alone.',
+      'Creating something to meet our needs can lead to unintended consequences we are not prepared for.',
+      'Loneliness makes people do foolish things.'
+    ],
+    answer:2,
+    explanation:'The theme captures a universal human truth that extends beyond the plot. The story illustrates how human desires (for connection) lead to creations (AI) that grow beyond what we intended, causing fear and conflict. This is a classic theme in science fiction (Frankenstein, etc.): unintended consequences of playing creator. Options A and B are too specific/literal. Option D is only about one character\'s motivation.'
+  },
+
+  // ===================== LANGUAGE (28) =====================
+
+  // --- Verb Moods ---
+  {
+    id:81, subject:'language', topic:'Verb Moods', difficulty:2,
+    question:'Which sentence uses the IMPERATIVE mood?',
+    options:[
+      'She studies hard every night.',
+      'If I were a bird, I would fly south.',
+      'Please close the door when you leave.',
+      'He might finish the project tomorrow.'
+    ],
+    answer:2,
+    explanation:'VERB MOODS tell the purpose of a sentence. INDICATIVE: states facts ("She studies"). IMPERATIVE: gives commands or requests — the subject "you" is implied ("Please close the door"). CONDITIONAL: hypothetical ("If I were..."). INTERROGATIVE: asks questions. Imperative sentences can be commands ("Stop!") or polite requests ("Please pass the salt").'
+  },
+  {
+    id:82, subject:'language', topic:'Verb Moods', difficulty:3,
+    question:'Which sentence uses the CONDITIONAL mood?',
+    options:[
+      'The team wins every game.',
+      'Open your textbooks to page 45.',
+      'If she practiced daily, she would improve rapidly.',
+      'Did you finish your homework?'
+    ],
+    answer:2,
+    explanation:'The CONDITIONAL mood expresses a hypothetical or imagined situation using "if...would/could/might." "If she practiced... she would improve" = a condition (practicing) + a result (improvement). Key word: "if." INDICATIVE = facts. IMPERATIVE = commands. INTERROGATIVE = questions. The conditional often deals with "what ifs."'
+  },
+
+  // --- Participles & Participial Phrases ---
+  {
+    id:83, subject:'language', topic:'Participial Phrases', difficulty:3,
+    question:'Identify the PARTICIPIAL PHRASE in: "Exhausted from the long hike, the children fell asleep immediately."',
+    options:['the children','fell asleep immediately','Exhausted from the long hike','from the long hike'],
+    answer:2,
+    explanation:'A PARTICIPIAL PHRASE begins with a past or present participle and modifies a noun. "Exhausted from the long hike" begins with the past participle "exhausted" and modifies "the children." It tells us WHY/HOW the children fell asleep. Participial phrases must be placed next to the noun they modify; otherwise you get a dangling modifier!'
+  },
+  {
+    id:84, subject:'language', topic:'Participial Phrases', difficulty:3,
+    question:'Which sentence contains a DANGLING MODIFIER (incorrectly placed participial phrase)?',
+    options:[
+      'Running through the park, Maria spotted a deer.',
+      'Walking to school, a cat crossed my path.',
+      'Covered in mud, the puppy needed a bath.',
+      'Startled by the noise, the birds flew away.'
+    ],
+    answer:1,
+    explanation:'A dangling modifier happens when the participial phrase doesn\'t logically connect to the noun it\'s supposed to modify. "Walking to school, a cat crossed my path" — the cat wasn\'t walking to school; the person was! Fix: "Walking to school, I saw a cat cross my path." Options A, C, D correctly place the phrase next to the right noun.'
+  },
+
+  // --- Comma Rules ---
+  {
+    id:85, subject:'language', topic:'Comma Rules', difficulty:2,
+    question:'Which sentence uses commas CORRECTLY with a nonrestrictive (nonessential) clause?',
+    options:[
+      'My brother who lives in Paris is visiting.',
+      'My brother, who lives in Paris, is visiting.',
+      'My, brother who lives in Paris is visiting.',
+      'My brother who, lives in Paris is visiting.'
+    ],
+    answer:1,
+    explanation:'A NONRESTRICTIVE (nonessential) clause adds extra information that could be removed without changing the sentence\'s basic meaning. Use COMMAS to set it off. "My brother, who lives in Paris, is visiting." Remove the clause: "My brother is visiting." — still makes sense! A RESTRICTIVE clause (no commas) is essential: "The brother who lives in Paris is visiting" (distinguishes which brother).'
+  },
+  {
+    id:86, subject:'language', topic:'Comma Rules', difficulty:2,
+    question:'Which sentence uses an APPOSITIVE with correct comma usage?',
+    options:[
+      'My teacher Ms. Rivera, is very kind.',
+      'My teacher, Ms. Rivera is very kind.',
+      'My teacher, Ms. Rivera, is very kind.',
+      'My, teacher Ms. Rivera is very kind.'
+    ],
+    answer:2,
+    explanation:'An APPOSITIVE is a noun phrase that renames the noun before it. "Ms. Rivera" renames "my teacher." Set off appositives with commas on BOTH sides. "My teacher, Ms. Rivera, is very kind." Remove the appositive: "My teacher is very kind." — still complete. Both commas are needed to properly set off the appositive.'
+  },
+
+  // --- Colons and Semicolons ---
+  {
+    id:87, subject:'language', topic:'Colons and Semicolons', difficulty:2,
+    question:'Which sentence uses a COLON correctly?',
+    options:[
+      'I need: to buy milk.',
+      'She loves: cats, dogs, and birds.',
+      'The recipe requires three ingredients: flour, eggs, and butter.',
+      'He ran: quickly down the street.'
+    ],
+    answer:2,
+    explanation:'A COLON introduces a list, explanation, or quote after a COMPLETE CLAUSE. "The recipe requires three ingredients" is a complete clause — a colon after it correctly introduces the list. Options A and B incorrectly place colons after incomplete phrases (can\'t separate a verb from its object with a colon). Rule: What comes BEFORE the colon must be a complete thought.'
+  },
+  {
+    id:88, subject:'language', topic:'Colons and Semicolons', difficulty:2,
+    question:'Which sentence uses a SEMICOLON correctly?',
+    options:[
+      'I was tired; but I kept going.',
+      'She likes running; swimming, and cycling.',
+      'The test was hard; however, most students passed.',
+      'He went home; early.'
+    ],
+    answer:2,
+    explanation:'A SEMICOLON connects two INDEPENDENT CLAUSES (complete sentences). "The test was hard" and "however, most students passed" are both complete thoughts. Semicolons are often used with conjunctive adverbs (however, therefore, meanwhile). Options A (use comma not semicolon before "but"), B (use commas in a list), and D (incomplete clause after semicolon) are all incorrect.'
+  },
+  {
+    id:89, subject:'language', topic:'Colons and Semicolons', difficulty:3,
+    question:'Which sentence is punctuated CORRECTLY?',
+    options:[
+      'Pack three things: a flashlight, a blanket; and extra food.',
+      'Pack three things: a flashlight, a blanket, and extra food.',
+      'Pack three things, a flashlight: a blanket, and extra food.',
+      'Pack three things a flashlight, a blanket, and extra food.'
+    ],
+    answer:1,
+    explanation:'After a complete clause introducing a list, use a COLON then COMMAS to separate items. "Pack three things" → colon → "a flashlight, a blanket, and extra food." The Oxford comma ("and extra food") is correct. Option A wrongly uses a semicolon mid-list. Option C misplaces the colon. Option D omits the colon entirely after "things."'
+  },
+
+  // --- Commonly Confused Words ---
+  {
+    id:90, subject:'language', topic:'Commonly Confused Words', difficulty:1,
+    question:'Choose the correct word: "The new rule will ___ everyone on the team."',
+    options:['effect','affect','affekt','efect'],
+    answer:1,
+    explanation:'"Affect" (verb) = to influence or have an impact on. "Effect" (noun) = the result or outcome. TRICK: Affect = Action (verb), Effect = End result (noun). "The rule will AFFECT everyone" — it will influence them. "The EFFECT of the rule is..." — that\'s the result. Common trick: A comes before E in the alphabet, and Affect (action/verb) comes before Effect (end result/noun).'
+  },
+  {
+    id:91, subject:'language', topic:'Commonly Confused Words', difficulty:1,
+    question:'Choose the correct words: "She is ___ tired ___ she can\'t walk."',
+    options:['than, then','so, that','too, that','then, that'],
+    answer:1,
+    explanation:'"So...that" is a cause-effect construction meaning "to such an extent that." "She is SO tired THAT she can\'t walk" = correct! "Too...to" is a different construction ("too tired TO walk") — it works but uses "to," not "that." The options here pair "too" with "that," which is grammatically incorrect in English. "So...that" is the correct paired construction for this sentence structure.'
+  },
+  {
+    id:92, subject:'language', topic:'Commonly Confused Words', difficulty:2,
+    question:'Which sentence uses "its" and "it\'s" correctly?',
+    options:[
+      "Its raining outside, and the dog wants it's dinner.",
+      "It's raining outside, and the dog wants its dinner.",
+      "Its raining outside, and the dog wants its dinner.",
+      "It's raining outside, and the dog wants it's dinner."
+    ],
+    answer:1,
+    explanation:'"It\'s" = it is (contraction). "Its" = belonging to it (possessive). Test: substitute "it is." "IT IS raining outside" ✓ → it\'s. "The dog wants IT IS dinner" ✗ → use "its" (possessive). This is one of the most common errors in writing! Remember: POSSESSIVE PRONOUNS never use apostrophes: its, his, hers, ours, theirs, whose.'
+  },
+  {
+    id:93, subject:'language', topic:'Commonly Confused Words', difficulty:2,
+    question:'Choose the correct words: "Yesterday I ___ my jacket at school; ___ were five jackets left behind."',
+    options:['lay, their','laid, there','left, they\'re','left, there'],
+    answer:3,
+    explanation:'"Left" (past tense of leave) is correct for forgetting something. "There" indicates a place or location. "They\'re" = they are (contraction). "Their" = belonging to them (possessive). "I LEFT my jacket at school" ✓; "THERE were five jackets" = at that place ✓. Watch for context: place → there; possession → their; contraction → they\'re.'
+  },
+  {
+    id:94, subject:'language', topic:'Commonly Confused Words', difficulty:2,
+    question:'Which sentence uses "than" and "then" CORRECTLY?',
+    options:[
+      'She is taller then her sister, than they went shopping.',
+      'She is taller than her sister; then they went shopping.',
+      'She is taller than her sister, than they went shopping.',
+      'She is taller then her sister; then they went shopping.'
+    ],
+    answer:1,
+    explanation:'"Than" is used for COMPARISONS. "Then" is used for TIME/SEQUENCE. "Taller THAN her sister" = comparison. "THEN they went shopping" = what happened next. Semicolon correctly joins two related independent clauses. Memory trick: "Then" has an "e" for time sequence; "Than" has an "a" for comparison — A for Assessment/comparison.'
+  },
+
+  // --- Active vs Passive Voice ---
+  {
+    id:95, subject:'language', topic:'Active vs Passive Voice', difficulty:2,
+    question:'Which sentence is in ACTIVE voice?',
+    options:[
+      'The cake was eaten by the children.',
+      'The book was written by a famous author.',
+      'The children ate the cake.',
+      'The award was given to her by the committee.'
+    ],
+    answer:2,
+    explanation:'ACTIVE voice: Subject DOES the action. Subject → Verb → Object. "The children ATE the cake" — children (subject) ate (verb) cake (object). PASSIVE voice: Subject RECEIVES the action. "The cake was eaten BY the children" — cake (subject) receives action. Active voice is usually clearer and more direct. Passive voice emphasizes what happened to something rather than who did it.'
+  },
+  {
+    id:96, subject:'language', topic:'Active vs Passive Voice', difficulty:3,
+    question:'Rewrite in ACTIVE voice: "The experiment was conducted by the scientists."',
+    options:[
+      'The scientists conducted the experiment.',
+      'The experiment conducted by scientists.',
+      'The scientists were conducting by the experiment.',
+      'Conducting the experiment were the scientists.'
+    ],
+    answer:0,
+    explanation:'Passive: "The experiment [subject] was conducted [passive verb] by the scientists [agent]." To convert to active: make the agent (scientists) the new subject: "The scientists [subject] conducted [active verb] the experiment [object]." The active version is shorter, clearer, and more direct. Rule: find "by + noun" in passive sentences — that noun becomes the subject in the active version.'
+  },
+
+  // --- Sentence Combining ---
+  {
+    id:97, subject:'language', topic:'Sentence Combining', difficulty:2,
+    question:'Which BEST combines these sentences? "The dog barked loudly. The dog frightened the mailman."',
+    options:[
+      'The dog barked loudly, it frightened the mailman.',
+      'The dog barked loudly, frightening the mailman.',
+      'The dog barked, and it was loud, and it frightened the mailman.',
+      'The dog barked loudly. And frightened the mailman.'
+    ],
+    answer:1,
+    explanation:'Option B uses a PARTICIPIAL PHRASE ("frightening the mailman") to show that the barking CAUSED the fright, combining the sentences elegantly. Option A is a comma splice (two sentences joined with only a comma — incorrect). Option C is redundant and awkward. Option D begins a sentence with "And" incorrectly. Sentence combining should result in a smooth, logical sentence.'
+  },
+  {
+    id:98, subject:'language', topic:'Sentence Combining', difficulty:3,
+    question:'Which BEST combines these two sentences? "Maya is a dedicated student. She always submits her work early."',
+    options:[
+      'Maya is a dedicated student, and she always submits her work early.',
+      'Maya is a dedicated student and always submits her work early.',
+      'Maya, a dedicated student, always submits her work early.',
+      'All of the above are grammatically correct.'
+    ],
+    answer:3,
+    explanation:'All three options are grammatically correct! Option A uses a compound sentence with a coordinating conjunction. Option B uses a compound predicate (two predicates share one subject). Option C uses an appositive phrase. The BEST combination depends on emphasis: C is most concise and elegant. However, this question tests recognizing that multiple correct forms exist in grammar.'
+  },
+
+  // --- Advanced Spelling ---
+  {
+    id:99, subject:'language', topic:'Advanced Spelling', difficulty:2,
+    question:'Which word is spelled CORRECTLY?',
+    options:['accomodate','accommodate','acommodate','acomodate'],
+    answer:1,
+    explanation:'"Accommodate" — remember: it has DOUBLE C and DOUBLE M: ac-COM-mo-date. Think: "accommodate" is large enough to accommodate two c\'s and two m\'s! It is consistently one of the most misspelled words in English. Mnemonic: "a CCorner CoMMittee" — double C, double M.'
+  },
+  {
+    id:100, subject:'language', topic:'Advanced Spelling', difficulty:2,
+    question:'Which word is spelled CORRECTLY?',
+    options:['seperate','separete','separate','seperrate'],
+    answer:2,
+    explanation:'"Separate" — the tricky part is the middle vowels. Remember: "there\'s A RAT in sepARAte." The vowel pattern is: sep-A-r-A-te. Many people misspell it "seperate" with an E. A silly mnemonic: "A RAT ran between the sep and the te" — sep-A-R-A-te.'
+  },
+  {
+    id:101, subject:'language', topic:'Verb Tenses', difficulty:2,
+    question:'Which sentence uses the PRESENT PERFECT tense correctly?',
+    options:[
+      'She finished her homework yesterday.',
+      'She has finished her homework.',
+      'She is finishing her homework.',
+      'She will finish her homework.'
+    ],
+    answer:1,
+    explanation:'PRESENT PERFECT: "has/have + past participle." "She HAS FINISHED her homework" = completed recently with relevance to now. Compare: Simple Past "She FINISHED her homework yesterday" (specific past time). Present Progressive "She IS FINISHING" (happening now). Future "She WILL FINISH." Use present perfect when the past action has present relevance (it\'s done NOW).'
+  },
+  {
+    id:102, subject:'language', topic:'Subject-Verb Agreement', difficulty:2,
+    question:'Choose the correct verb: "Neither the students nor the teacher ___ able to solve the puzzle."',
+    options:['were','are','was','be'],
+    answer:2,
+    explanation:'"Neither...nor" uses the verb that AGREES WITH THE CLOSER SUBJECT. The subjects are "students" (plural) and "teacher" (singular). The closer subject is "teacher" (singular), so use the singular verb: WAS. This is the proximity rule: with "either...or" and "neither...nor," match the verb to the NEAREST subject. If it were "the teacher or the students," use "were."'
+  },
+  {
+    id:103, subject:'language', topic:'Punctuation', difficulty:2,
+    question:'Which sentence uses an EM DASH correctly?',
+    options:[
+      'She packed everything she needed—her sleeping bag—tent, and flashlight.',
+      'She had one dream—to climb Mount Everest.',
+      'She—went—to—the—store.',
+      'She had—already left when I arrived.'
+    ],
+    answer:1,
+    explanation:'An EM DASH (—) adds emphasis or sets off information with more drama than commas or parentheses. "She had one dream—to climb Mount Everest" uses the dash to dramatically introduce and emphasize what the dream was. Em dashes can also set off parenthetical information on both sides: "Her dream—climbing Everest—consumed her." Option A should use commas for the list.'
+  },
+  {
+    id:104, subject:'language', topic:'Pronoun Agreement', difficulty:3,
+    question:'Which sentence has CORRECT pronoun-antecedent agreement?',
+    options:[
+      'Everyone forgot their homework at home.',
+      'Everyone forgot his or her homework at home.',
+      'Everyone forgot its homework at home.',
+      'Both A and B are considered correct in modern usage.'
+    ],
+    answer:3,
+    explanation:'"Everyone" is a singular indefinite pronoun. Traditionally, "his or her" (Option B) is grammatically correct. However, modern English widely accepts "their" as a singular pronoun to avoid gender specification (Option A). Both are used in academic and professional writing today. "Its" (Option C) is wrong — "its" is for things, not people.'
+  },
+  {
+    id:105, subject:'language', topic:'Relative Clauses', difficulty:2,
+    question:'Which sentence uses "who" vs. "whom" correctly?',
+    options:[
+      'Who did you give the letter to?',
+      'Whom wrote this poem?',
+      'To whom should I address this letter?',
+      'Whom is calling?'
+    ],
+    answer:2,
+    explanation:'"Who" is a subject pronoun (does the action). "Whom" is an object pronoun (receives the action). Trick: substitute "him/her" — if it works, use "whom." "To WHOM should I address this?" → "I should address it to HIM" ✓ → whom. "WHO wrote this?" → "HE wrote it" ✓ → who. "WHOM is calling?" → "HIM is calling" ✗ → should be "who."'
+  },
+  {
+    id:106, subject:'language', topic:'Capitalization', difficulty:1,
+    question:'Which sentence uses CORRECT capitalization?',
+    options:[
+      'We studied the american revolution in history class.',
+      'We studied the American revolution in History class.',
+      'We studied the American Revolution in history class.',
+      'We studied the American Revolution in History Class.'
+    ],
+    answer:2,
+    explanation:'Capitalize proper nouns and proper adjectives, but NOT common nouns. "American Revolution" is a specific historical event = proper noun → capitalize both words. "history class" is a common noun phrase → lowercase. Compare: "History Class" would only be capitalized if it\'s the official name of the course (like on a schedule). Option C is correct.'
+  },
+  {
+    id:107, subject:'language', topic:'Conjunctions', difficulty:2,
+    question:'Which sentence uses a SUBORDINATING conjunction correctly?',
+    options:[
+      'She studied hard, but she failed the test.',
+      'Although she studied hard, she failed the test.',
+      'She studied hard and she failed the test.',
+      'She studied hard or she failed the test.'
+    ],
+    answer:1,
+    explanation:'SUBORDINATING conjunctions (although, because, while, since, unless, until) connect a dependent clause to an independent clause. "Although she studied hard" = dependent clause (can\'t stand alone); "she failed the test" = independent clause. Together they make a complete sentence showing contrast. "But" is a COORDINATING conjunction (connects equal clauses).'
+  },
+  {
+    id:108, subject:'language', topic:'Advanced Spelling', difficulty:3,
+    question:'Which word is spelled CORRECTLY?',
+    options:['misspelled','mispelled','misspeled','mispeled'],
+    answer:0,
+    explanation:'"Misspelled" — here is a delicious irony: "misspelled" is itself commonly misspelled! It comes from the prefix "mis-" (meaning wrongly/badly) + "spelled." Since "spelled" starts with S, and "mis-" ends with S, you get a double-S: mis + spelled = miSSPELLED. There is no "s" dropped! The word has a double S and a double L: mi-SS-pe-LL-ed.'
+  }
+];
+
+// ============================================================
+// APP STATE
+// ============================================================
+let state = {
+  selectedSubject: 'all',
+  selectedMode: 'practice',
+  quizQuestions: [],
+  currentIndex: 0,
+  score: 0,
+  streak: 0,
+  currentDifficulty: 2,
+  consecutiveCorrect: 0,
+  consecutiveWrong: 0,
+  answered: false,
+  wrongAnswers: [],
+  topicStats: {},
+  timerInterval: null,
+  timerSeconds: 0,
+  totalTimerSeconds: 0,
+};
+
+function $(id) { return document.getElementById(id); }
+
+function showScreen(id) {
+  ['homeScreen','quizScreen','resultsScreen','reviewScreen'].forEach(s => {
+    $(s).style.display = s === id ? 'block' : 'none';
+  });
+}
+
+function selectSubject(subject, el) {
+  state.selectedSubject = subject;
+  document.querySelectorAll('.subject-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function selectMode(mode, el) {
+  state.selectedMode = mode;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function buildStars() {
+  const container = $('starsContainer');
+  for (let i = 0; i < 80; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    star.style.left = Math.random() * 100 + '%';
+    star.style.top = Math.random() * 100 + '%';
+    star.style.setProperty('--d', (2 + Math.random() * 4) + 's');
+    star.style.setProperty('--o', (0.3 + Math.random() * 0.7).toFixed(2));
+    container.appendChild(star);
+  }
+}
+
+function buildQuestionSet() {
+  let pool = state.selectedSubject === 'all' ? [...QUESTIONS] : QUESTIONS.filter(q => q.subject === state.selectedSubject);
+  pool.sort(() => Math.random() - 0.5);
+  const count = state.selectedMode === 'test' ? 20 : Math.min(pool.length, 30);
+  return pool.slice(0, count);
+}
+
+function startQuiz() {
+  state.currentDifficulty = 2;
+  state.consecutiveCorrect = 0;
+  state.consecutiveWrong = 0;
+  state.currentIndex = 0;
+  state.score = 0;
+  state.streak = 0;
+  state.wrongAnswers = [];
+  state.topicStats = {};
+  state.answered = false;
+  state.quizQuestions = buildQuestionSet();
+  showScreen('quizScreen');
+  $('timerWrap').classList.toggle('active', state.selectedMode === 'test');
+  if (state.selectedMode === 'test') {
+    state.totalTimerSeconds = state.quizQuestions.length * 90;
+    state.timerSeconds = state.totalTimerSeconds;
+    startTimer();
+  }
+  renderQuestion();
+}
+
+function startTimer() {
+  clearInterval(state.timerInterval);
+  state.timerInterval = setInterval(() => {
+    state.timerSeconds--;
+    updateTimerDisplay();
+    if (state.timerSeconds <= 0) { clearInterval(state.timerInterval); endQuiz(); }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(state.timerSeconds / 60);
+  const s = state.timerSeconds % 60;
+  $('timerDisplay').textContent = `⏱ ${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  $('timerDisplay').classList.toggle('urgent', state.timerSeconds <= 30);
+}
+
+function shuffleOptions(q) {
+  const indexed = q.options.map((text, i) => ({ text, isCorrect: i === q.answer }));
+  for (let i = indexed.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indexed[i], indexed[j]] = [indexed[j], indexed[i]];
+  }
+  const shuffledAnswer = indexed.findIndex(o => o.isCorrect);
+  return { shuffledOptions: indexed.map(o => o.text), shuffledAnswer };
+}
+
+function renderQuestion() {
+  const q = state.quizQuestions[state.currentIndex];
+  state.answered = false;
+  const { shuffledOptions, shuffledAnswer } = shuffleOptions(q);
+  q._shuffledOptions = shuffledOptions;
+  q._shuffledAnswer = shuffledAnswer;
+
+  const pct = (state.currentIndex / state.quizQuestions.length) * 100;
+  $('progressFill').style.width = pct + '%';
+  $('progressText').textContent = `Question ${state.currentIndex + 1} of ${state.quizQuestions.length}`;
+  $('scoreChip').textContent = `${state.score} ⭐`;
+
+  const subjectConfig = {
+    math:     { label:'🔢 Math',     bg:'rgba(59,130,246,0.2)', color:'#60a5fa' },
+    reading:  { label:'📚 Reading',  bg:'rgba(34,197,94,0.2)',  color:'#4ade80' },
+    language: { label:'✏️ Language', bg:'rgba(245,158,11,0.2)', color:'#fbbf24' },
+  };
+  const cfg = subjectConfig[q.subject] || subjectConfig.math;
+  const badge = $('subjectBadge');
+  badge.textContent = cfg.label;
+  badge.style.background = cfg.bg;
+  badge.style.color = cfg.color;
+
+  const diffMap = { 1:'⭐', 2:'⭐⭐', 3:'⭐⭐⭐' };
+  $('diffStars').textContent = diffMap[q.difficulty] || '⭐⭐';
+  $('topicTag').textContent = q.topic;
+
+  const banner = $('streakBanner');
+  banner.style.display = 'none';
+  if (state.streak >= 3) {
+    banner.textContent = `🔥 ${state.streak} in a row! Keep going!`;
+    banner.style.display = 'block';
+  }
+
+  $('questionNum').textContent = `Question ${state.currentIndex + 1}`;
+  const passageBox = $('passageBox');
+  if (q.passage) {
+    passageBox.textContent = q.passage;
+    passageBox.classList.remove('hidden');
+  } else {
+    passageBox.classList.add('hidden');
+    passageBox.textContent = '';
+  }
+  $('questionText').textContent = q.question;
+
+  const grid = $('optionsGrid');
+  grid.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  q._shuffledOptions.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="opt-letter">${letters[i]}</span><span class="opt-text">${opt}</span>`;
+    btn.onclick = () => handleAnswer(i, btn);
+    grid.appendChild(btn);
+  });
+
+  $('feedbackPanel').style.display = 'none';
+  $('feedbackPanel').className = 'feedback-panel';
+  $('nextBtn').classList.add('hidden');
+
+  const card = $('questionCard');
+  card.style.animation = 'none';
+  requestAnimationFrame(() => { card.style.animation = ''; });
+}
+
+function handleAnswer(chosen, btn) {
+  if (state.answered) return;
+  state.answered = true;
+
+  const q = state.quizQuestions[state.currentIndex];
+  const correct = q._shuffledAnswer;
+  const allBtns = document.querySelectorAll('.option-btn');
+
+  if (!state.topicStats[q.topic]) state.topicStats[q.topic] = { correct:0, total:0 };
+  state.topicStats[q.topic].total++;
+  allBtns.forEach(b => b.disabled = true);
+
+  const isCorrect = chosen === correct;
+  allBtns[correct].classList.add('correct');
+
+  if (isCorrect) {
+    state.score++;
+    state.streak++;
+    state.consecutiveCorrect++;
+    state.consecutiveWrong = 0;
+    state.topicStats[q.topic].correct++;
+    if (state.consecutiveCorrect >= 2 && state.currentDifficulty < 3) {
+      state.currentDifficulty++;
+      state.consecutiveCorrect = 0;
+    }
+    showFeedback(true, q.explanation, null);
+    launchConfetti();
+  } else {
+    btn.classList.add('incorrect');
+    state.streak = 0;
+    state.consecutiveWrong++;
+    state.consecutiveCorrect = 0;
+    if (state.consecutiveWrong >= 2 && state.currentDifficulty > 1) {
+      state.currentDifficulty--;
+      state.consecutiveWrong = 0;
+    }
+    state.wrongAnswers.push({ q, chosen, correct, chosenText: q._shuffledOptions[chosen], correctText: q._shuffledOptions[correct] });
+    showFeedback(false, q.explanation, q._shuffledOptions[correct]);
+  }
+
+  allBtns.forEach((b, i) => {
+    if (i !== correct && i !== chosen) b.classList.add('dimmed');
+  });
+
+  $('nextBtn').classList.remove('hidden');
+  $('scoreChip').textContent = `${state.score} ⭐`;
+}
+
+function showFeedback(isCorrect, explanation, correctText) {
+  const panel = $('feedbackPanel');
+  const headline = $('feedbackHeadline');
+  const expl = $('feedbackExplanation');
+  const note = $('correctAnswerNote');
+
+  const positives = ['🎉 Excellent!','⭐ Correct!','🚀 You got it!','🌟 Awesome!','💡 That\'s right!','🎯 Bull\'s-eye!','🏆 Perfect!','✨ Great thinking!'];
+  const negatives = ['❌ Not quite…','😅 Almost!','🔄 Try to remember this one!','📖 Good to review!','💪 Keep going!'];
+
+  if (isCorrect) {
+    headline.textContent = positives[Math.floor(Math.random() * positives.length)];
+    headline.className = 'feedback-headline correct-fb';
+    panel.className = 'feedback-panel correct-fb';
+    note.classList.add('hidden');
+  } else {
+    headline.textContent = negatives[Math.floor(Math.random() * negatives.length)];
+    headline.className = 'feedback-headline incorrect-fb';
+    panel.className = 'feedback-panel incorrect-fb';
+    note.textContent = `✅ Correct answer: ${correctText}`;
+    note.classList.remove('hidden');
+  }
+
+  expl.textContent = explanation;
+  panel.style.display = 'block';
+}
+
+function nextQuestion() {
+  state.currentIndex++;
+  if (state.currentIndex >= state.quizQuestions.length) {
+    endQuiz();
+  } else {
+    renderQuestion();
+  }
+}
+
+function endQuiz() {
+  clearInterval(state.timerInterval);
+  showScreen('resultsScreen');
+
+  const total = state.quizQuestions.length;
+  const score = state.score;
+  const pct = total > 0 ? Math.round((score / total) * 100) : 0;
+
+  $('resultScoreBig').textContent = `${score} / ${total}`;
+  $('resultScoreLabel').textContent = `${pct}% Correct`;
+
+  let trophy, title, stars, message;
+  if (pct >= 90) {
+    trophy = '🏆'; title = 'Outstanding!'; stars = '⭐⭐⭐⭐⭐';
+    message = 'Incredible work! You\'re absolutely crushing Grade 5! You\'re ready for any MAP test that comes your way. Keep reaching for the stars! 🌟';
+    launchMegaConfetti();
+  } else if (pct >= 75) {
+    trophy = '🥇'; title = 'Great Job!'; stars = '⭐⭐⭐⭐';
+    message = 'Excellent effort! You\'ve mastered most of the Grade 5 material. Review the topics you missed and you\'ll be unstoppable! 💪';
+  } else if (pct >= 60) {
+    trophy = '🥈'; title = 'Good Effort!'; stars = '⭐⭐⭐';
+    message = 'You\'re making real progress on Grade 5 content! Keep practicing the areas you missed. Every practice session builds your skills! 📚';
+  } else if (pct >= 40) {
+    trophy = '🥉'; title = 'Keep Practicing!'; stars = '⭐⭐';
+    message = 'Grade 5 is challenging — that\'s okay! Review the explanations carefully and try again. Practice makes progress! 🌱';
+  } else {
+    trophy = '💫'; title = 'You Can Do It!'; stars = '⭐';
+    message = 'Grade 5 concepts take time to master. Read through the explanations, ask your teacher for help, and try again. You\'ve got this! 🚀';
+  }
+
+  $('resultTrophy').textContent = trophy;
+  $('resultTitle').textContent = title;
+  $('resultStars').textContent = stars;
+  $('resultMessage').textContent = message;
+
+  buildBreakdown();
+  $('reviewBtn').style.display = state.wrongAnswers.length > 0 ? 'block' : 'none';
+}
+
+function buildBreakdown() {
+  const container = $('breakdownRows');
+  container.innerHTML = '';
+
+  const subjectColors = { math:'#3b82f6', reading:'#22c55e', language:'#f59e0b' };
+  const subjectStats = {};
+
+  state.quizQuestions.forEach((q) => {
+    if (!subjectStats[q.subject]) subjectStats[q.subject] = { correct:0, total:0 };
+    subjectStats[q.subject].total++;
+    const wrongEntry = state.wrongAnswers.find(w => w.q === q);
+    if (!wrongEntry) subjectStats[q.subject].correct++;
+  });
+
+  Object.entries(subjectStats).forEach(([sub, stat]) => {
+    const pct = stat.total > 0 ? Math.round((stat.correct / stat.total) * 100) : 0;
+    const color = subjectColors[sub] || '#a855f7';
+    const labels = { math:'🔢 Math', reading:'📚 Reading', language:'✏️ Language' };
+    const row = document.createElement('div');
+    row.className = 'breakdown-row';
+    row.innerHTML = `
+      <span class="breakdown-subject">${labels[sub] || sub}</span>
+      <div class="breakdown-bar-bg">
+        <div class="breakdown-bar-fill" style="background:${color};width:0%" data-pct="${pct}"></div>
+      </div>
+      <span class="breakdown-pct" style="color:${color}">${pct}%</span>
+    `;
+    container.appendChild(row);
+  });
+
+  setTimeout(() => {
+    document.querySelectorAll('.breakdown-bar-fill').forEach(bar => {
+      bar.style.width = bar.dataset.pct + '%';
+    });
+  }, 200);
+}
+
+function showReview() {
+  showScreen('reviewScreen');
+  const container = $('reviewItems');
+  container.innerHTML = '';
+  const letters = ['A','B','C','D'];
+
+  if (state.wrongAnswers.length === 0) {
+    container.innerHTML = '<p style="text-align:center;color:#94a3b8;padding:30px">🎉 You got everything right! Nothing to review!</p>';
+    return;
+  }
+
+  state.wrongAnswers.forEach(({ q, chosen, correct, chosenText, correctText }) => {
+    const item = document.createElement('div');
+    item.className = 'review-item';
+    item.innerHTML = `
+      <div class="review-q"><strong>[${q.topic}]</strong> ${q.question}</div>
+      <div class="review-your-answer">❌ Your answer: ${letters[chosen]}. ${chosenText}</div>
+      <div class="review-correct-answer">✅ Correct answer: ${letters[correct]}. ${correctText}</div>
+      <div class="review-explanation">💡 <strong>Explanation:</strong> ${q.explanation}</div>
+    `;
+    container.appendChild(item);
+  });
+}
+
+function showResults() { showScreen('resultsScreen'); }
+function restartQuiz() { startQuiz(); }
+function goHome() {
+  clearInterval(state.timerInterval);
+  showScreen('homeScreen');
+}
+
+function launchConfetti(count = 30) {
+  const container = $('confettiContainer');
+  const colors = ['#ffd700','#ff6b6b','#a855f7','#3b82f6','#22c55e','#f59e0b','#ec4899'];
+  for (let i = 0; i < count; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = (10 + Math.random() * 80) + '%';
+    piece.style.top = '-20px';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    piece.style.setProperty('--dur', (1.5 + Math.random() * 2) + 's');
+    piece.style.setProperty('--delay', (Math.random() * 0.5) + 's');
+    container.appendChild(piece);
+    piece.addEventListener('animationend', () => piece.remove());
+  }
+}
+
+function launchMegaConfetti() {
+  for (let i = 0; i < 5; i++) {
+    setTimeout(() => launchConfetti(25), i * 300);
+  }
+}
+
+buildStars();
+showScreen('homeScreen');
+document.querySelector('[data-subject="all"]').classList.add('selected');
+document.querySelector('[data-mode="practice"]').classList.add('selected');
+</script>
+</body>
+</html>

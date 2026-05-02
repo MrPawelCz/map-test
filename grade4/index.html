@@ -1,0 +1,1950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌟 Grade 4 / Year 5 — MAP Test Adventure</title>
+  <style>
+    /* ===== BASE & RESET ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%);
+      min-height: 100vh;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    /* ===== STAR BACKGROUND ===== */
+    .stars {
+      position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0;
+    }
+    .star {
+      position: absolute; width: 3px; height: 3px; background: #fff;
+      border-radius: 50%; animation: twinkle var(--d, 3s) infinite;
+      opacity: var(--o, 0.6);
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: var(--o, 0.6); transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.5); }
+    }
+
+    /* ===== LAYOUT ===== */
+    #app {
+      position: relative; z-index: 1;
+      max-width: 780px; margin: 0 auto;
+      padding: 20px 16px 40px;
+      min-height: 100vh;
+    }
+
+    /* ===== HOME SCREEN ===== */
+    #homeScreen { text-align: center; padding-top: 30px; }
+    .logo-mascot { font-size: 80px; animation: bounce 2s ease-in-out infinite; display: block; margin-bottom: 10px; }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+    .app-title {
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      font-weight: 900;
+      background: linear-gradient(90deg, #ffd700, #ff6b6b, #a855f7, #3b82f6);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+    .app-subtitle { font-size: 1.1rem; color: #94a3b8; margin-bottom: 30px; }
+
+    .subject-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;
+      margin-bottom: 24px;
+    }
+    .subject-card {
+      background: rgba(255,255,255,0.07);
+      border: 2px solid transparent;
+      border-radius: 18px; padding: 20px 14px;
+      cursor: pointer; transition: all 0.25s;
+      text-align: center;
+    }
+    .subject-card:hover, .subject-card.selected {
+      background: rgba(255,255,255,0.14);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+    .subject-card.selected { border-color: var(--color); }
+    .subject-card .icon { font-size: 2.4rem; display: block; margin-bottom: 8px; }
+    .subject-card .label { font-weight: 700; font-size: 1.05rem; }
+    .subject-card .count { font-size: 0.8rem; color: #94a3b8; margin-top: 2px; }
+    .subject-card[data-subject="all"]  { --color: #ffd700; }
+    .subject-card[data-subject="math"] { --color: #3b82f6; }
+    .subject-card[data-subject="reading"] { --color: #22c55e; }
+    .subject-card[data-subject="language"] { --color: #f59e0b; }
+
+    .mode-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;
+    }
+    .mode-btn {
+      background: rgba(255,255,255,0.07);
+      border: 2px solid transparent; border-radius: 14px; padding: 14px 10px;
+      cursor: pointer; transition: all 0.2s; text-align: center;
+    }
+    .mode-btn:hover, .mode-btn.selected {
+      background: rgba(255,255,255,0.14);
+      border-color: #a855f7; transform: translateY(-2px);
+    }
+    .mode-btn .icon { font-size: 1.6rem; display: block; margin-bottom: 4px; }
+    .mode-btn .label { font-weight: 700; font-size: 0.95rem; }
+    .mode-btn .desc { font-size: 0.75rem; color: #94a3b8; margin-top: 2px; }
+
+    .start-btn {
+      display: block; width: 100%; padding: 18px;
+      background: linear-gradient(135deg, #6d28d9, #a855f7);
+      border: none; border-radius: 16px; font-size: 1.25rem;
+      font-weight: 800; color: #fff; cursor: pointer;
+      transition: all 0.2s; letter-spacing: 0.5px;
+      box-shadow: 0 4px 20px rgba(168,85,247,0.4);
+    }
+    .start-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(168,85,247,0.5); }
+    .start-btn:active { transform: translateY(0); }
+
+    /* ===== PROGRESS BAR ===== */
+    #quizScreen { display: none; }
+    .quiz-header {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+    }
+    .subject-badge {
+      padding: 4px 12px; border-radius: 20px; font-size: 0.8rem;
+      font-weight: 700; white-space: nowrap;
+      background: var(--badge-bg, rgba(255,255,255,0.1));
+      color: var(--badge-color, #fff);
+    }
+    .progress-wrap { flex: 1; }
+    .progress-bar-bg {
+      background: rgba(255,255,255,0.1); border-radius: 10px;
+      height: 10px; overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%; border-radius: 10px;
+      background: linear-gradient(90deg, #6d28d9, #a855f7, #ec4899);
+      transition: width 0.4s ease; width: 0%;
+    }
+    .progress-text { font-size: 0.78rem; color: #94a3b8; margin-top: 3px; }
+    .score-chip {
+      background: rgba(255,215,0,0.15); border: 1px solid rgba(255,215,0,0.3);
+      border-radius: 20px; padding: 4px 12px; font-size: 0.85rem;
+      font-weight: 700; color: #ffd700; white-space: nowrap;
+    }
+
+    /* Timer */
+    .timer-wrap { display: none; }
+    .timer-wrap.active { display: block; }
+    .timer {
+      font-size: 1rem; font-weight: 700; padding: 4px 12px;
+      border-radius: 20px; background: rgba(239,68,68,0.15);
+      border: 1px solid rgba(239,68,68,0.3); color: #f87171;
+      transition: all 0.3s;
+    }
+    .timer.urgent { background: rgba(239,68,68,0.4); animation: pulse 0.5s infinite; }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.6; } }
+
+    /* Difficulty stars */
+    .difficulty-row {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
+    }
+    .diff-label { font-size: 0.8rem; color: #94a3b8; }
+    .diff-stars { font-size: 1rem; letter-spacing: 2px; }
+    .topic-tag {
+      margin-left: auto; font-size: 0.75rem; color: #a78bfa;
+      background: rgba(167,139,250,0.1); padding: 2px 10px;
+      border-radius: 10px;
+    }
+
+    /* Question card */
+    .question-card {
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 22px; padding: 28px 24px;
+      margin-bottom: 20px; animation: fadeIn 0.35s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .question-num { font-size: 0.8rem; color: #94a3b8; margin-bottom: 8px; }
+    .question-text {
+      font-size: clamp(1rem, 2.5vw, 1.18rem);
+      font-weight: 600; line-height: 1.6; margin-bottom: 8px;
+    }
+    .passage-box {
+      background: rgba(255,255,255,0.05);
+      border-left: 3px solid #a855f7;
+      border-radius: 8px; padding: 14px 16px;
+      font-size: 0.92rem; line-height: 1.7;
+      color: #cbd5e1; margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    /* Answer options */
+    .options-grid { display: flex; flex-direction: column; gap: 10px; }
+    .option-btn {
+      display: flex; align-items: center; gap: 14px;
+      background: rgba(255,255,255,0.06);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 14px; padding: 14px 18px;
+      cursor: pointer; transition: all 0.2s; text-align: left;
+      font-size: 1rem; color: #fff; font-family: inherit;
+    }
+    .option-btn:hover:not(:disabled) {
+      background: rgba(255,255,255,0.12);
+      border-color: rgba(168,85,247,0.5);
+      transform: translateX(4px);
+    }
+    .option-btn .opt-letter {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(255,255,255,0.1); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.9rem;
+    }
+    .option-btn .opt-text { line-height: 1.4; flex: 1; }
+
+    .option-btn.correct {
+      background: rgba(34,197,94,0.15) !important;
+      border-color: #22c55e !important;
+    }
+    .option-btn.correct .opt-letter { background: #22c55e; }
+    .option-btn.incorrect {
+      background: rgba(239,68,68,0.15) !important;
+      border-color: #ef4444 !important;
+    }
+    .option-btn.incorrect .opt-letter { background: #ef4444; }
+    .option-btn.dimmed { opacity: 0.4; cursor: default; }
+    .option-btn:disabled { cursor: default; }
+
+    /* Feedback panel */
+    .feedback-panel {
+      border-radius: 18px; padding: 20px;
+      margin-bottom: 16px; animation: slideUp 0.3s ease;
+      display: none;
+    }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    .feedback-panel.correct-fb { background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3); }
+    .feedback-panel.incorrect-fb { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); }
+    .feedback-headline { font-size: 1.1rem; font-weight: 800; margin-bottom: 8px; }
+    .feedback-headline.correct-fb { color: #4ade80; }
+    .feedback-headline.incorrect-fb { color: #f87171; }
+    .feedback-explanation { font-size: 0.93rem; line-height: 1.65; color: #cbd5e1; }
+    .correct-answer-note {
+      margin-top: 10px; font-size: 0.88rem;
+      color: #86efac; font-weight: 600;
+    }
+
+    .next-btn {
+      display: block; width: 100%; padding: 16px;
+      background: linear-gradient(135deg, #6d28d9, #a855f7);
+      border: none; border-radius: 14px;
+      font-size: 1.1rem; font-weight: 700; color: #fff;
+      cursor: pointer; transition: all 0.2s;
+      box-shadow: 0 4px 16px rgba(168,85,247,0.3);
+    }
+    .next-btn:hover { transform: translateY(-2px); }
+    .next-btn:active { transform: translateY(0); }
+
+    /* Streak banner */
+    .streak-banner {
+      text-align: center; padding: 8px;
+      font-size: 0.9rem; font-weight: 700;
+      color: #ffd700; animation: fadeIn 0.3s;
+      display: none;
+    }
+
+    /* ===== RESULTS SCREEN ===== */
+    #resultsScreen { display: none; text-align: center; padding-top: 20px; }
+    .result-trophy { font-size: 5rem; animation: spin 1s ease-out; display: block; margin-bottom: 10px; }
+    @keyframes spin { from { transform: rotate(-20deg) scale(0); } to { transform: rotate(0) scale(1); } }
+    .result-title { font-size: 2rem; font-weight: 900; margin-bottom: 6px; }
+    .result-score-big {
+      font-size: 3.5rem; font-weight: 900;
+      background: linear-gradient(90deg, #ffd700, #f59e0b);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .result-score-label { font-size: 1rem; color: #94a3b8; margin-bottom: 16px; }
+    .stars-row { font-size: 2.5rem; margin-bottom: 20px; letter-spacing: 4px; }
+    .result-message { font-size: 1.1rem; color: #cbd5e1; margin-bottom: 28px; line-height: 1.5; }
+
+    .breakdown-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 18px; padding: 20px 24px;
+      margin-bottom: 20px; text-align: left;
+    }
+    .breakdown-title { font-size: 0.85rem; color: #94a3b8; font-weight: 600; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 1px; }
+    .breakdown-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .breakdown-subject { font-size: 0.9rem; font-weight: 600; flex: 1; }
+    .breakdown-bar-bg { flex: 2; height: 8px; background: rgba(255,255,255,0.1); border-radius: 6px; overflow: hidden; }
+    .breakdown-bar-fill { height: 100%; border-radius: 6px; transition: width 1s ease; }
+    .breakdown-pct { font-size: 0.85rem; font-weight: 700; width: 44px; text-align: right; }
+
+    .result-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    .result-btn {
+      padding: 14px; border: none; border-radius: 14px;
+      font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s;
+    }
+    .result-btn.primary {
+      background: linear-gradient(135deg, #6d28d9, #a855f7);
+      color: #fff; box-shadow: 0 4px 16px rgba(168,85,247,0.3);
+    }
+    .result-btn.secondary {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.2); color: #fff;
+    }
+    .result-btn:hover { transform: translateY(-2px); }
+
+    /* ===== REVIEW SCREEN ===== */
+    #reviewScreen { display: none; }
+    .review-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+    .back-btn {
+      background: rgba(255,255,255,0.08); border: none;
+      border-radius: 10px; padding: 8px 14px;
+      color: #fff; cursor: pointer; font-size: 0.9rem;
+      font-weight: 600; transition: all 0.2s;
+    }
+    .back-btn:hover { background: rgba(255,255,255,0.14); }
+    .review-title { font-size: 1.3rem; font-weight: 800; }
+    .review-item {
+      background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.25);
+      border-radius: 16px; padding: 18px 20px; margin-bottom: 16px;
+    }
+    .review-q { font-size: 0.95rem; font-weight: 600; margin-bottom: 10px; line-height: 1.5; }
+    .review-your-answer {
+      font-size: 0.85rem; color: #f87171; margin-bottom: 4px;
+    }
+    .review-correct-answer {
+      font-size: 0.85rem; color: #4ade80; margin-bottom: 10px; font-weight: 700;
+    }
+    .review-explanation {
+      font-size: 0.85rem; color: #94a3b8; line-height: 1.6;
+      padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.07);
+    }
+
+    /* ===== CONFETTI ===== */
+    .confetti-wrap { position: fixed; inset: 0; pointer-events: none; z-index: 999; overflow: hidden; }
+    .confetti-piece {
+      position: absolute; width: 10px; height: 14px;
+      opacity: 0; animation: confettiFall var(--dur, 2.5s) ease-in var(--delay, 0s) forwards;
+    }
+    @keyframes confettiFall {
+      0% { opacity: 1; transform: translateY(-30px) rotate(0deg); }
+      100% { opacity: 0; transform: translateY(100vh) rotate(720deg); }
+    }
+
+    /* ===== UTILITIES ===== */
+    .hidden { display: none !important; }
+    .mt-2 { margin-top: 8px; }
+    .text-center { text-align: center; }
+    .adaptive-badge {
+      display: inline-block; font-size: 0.72rem; padding: 2px 8px;
+      border-radius: 8px; font-weight: 700; margin-left: 8px;
+      vertical-align: middle;
+    }
+    .badge-harder { background: rgba(239,68,68,0.2); color: #f87171; }
+    .badge-easier { background: rgba(34,197,94,0.2); color: #4ade80; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 480px) {
+      .subject-grid { grid-template-columns: 1fr 1fr; }
+      .mode-row { grid-template-columns: 1fr 1fr; }
+      .result-btns { grid-template-columns: 1fr; }
+      .question-card { padding: 20px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Starfield background -->
+<div class="stars" id="starsContainer"></div>
+
+<!-- Confetti container -->
+<div class="confetti-wrap" id="confettiContainer"></div>
+
+<div id="app">
+
+  <!-- =========== HOME SCREEN =========== -->
+  <div id="homeScreen">
+    <span class="logo-mascot">🚀</span>
+    <div style="margin-bottom:14px"><a href="../index.html" style="display:inline-flex;align-items:center;gap:6px;color:#a0c4ff;font-size:0.9rem;font-weight:600;text-decoration:none;background:rgba(255,255,255,0.07);padding:6px 14px;border-radius:20px;">← All Grades</a></div>
+    <h1 class="app-title">Grade 4 / Year 5</h1>
+    <p class="app-subtitle">MAP Test Practice — Math · Reading · Language · Age 9–10</p>
+
+    <h2 style="font-size:0.9rem;color:#94a3b8;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px;">Choose a Subject</h2>
+    <div class="subject-grid">
+      <div class="subject-card selected" data-subject="all" style="--color:#ffd700" onclick="selectSubject('all',this)">
+        <span class="icon">⭐</span>
+        <div class="label">All Subjects</div>
+        <div class="count">108 questions</div>
+      </div>
+      <div class="subject-card" data-subject="math" style="--color:#3b82f6" onclick="selectSubject('math',this)">
+        <span class="icon">🔢</span>
+        <div class="label">Math</div>
+        <div class="count">42 questions</div>
+      </div>
+      <div class="subject-card" data-subject="reading" style="--color:#22c55e" onclick="selectSubject('reading',this)">
+        <span class="icon">📚</span>
+        <div class="label">Reading</div>
+        <div class="count">38 questions</div>
+      </div>
+      <div class="subject-card" data-subject="language" style="--color:#f59e0b" onclick="selectSubject('language',this)">
+        <span class="icon">✏️</span>
+        <div class="label">Language</div>
+        <div class="count">28 questions</div>
+      </div>
+    </div>
+
+    <h2 style="font-size:0.9rem;color:#94a3b8;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px;">Choose a Mode</h2>
+    <div class="mode-row">
+      <div class="mode-btn selected" data-mode="practice" onclick="selectMode('practice',this)">
+        <span class="icon">🌱</span>
+        <div class="label">Practice Mode</div>
+        <div class="desc">Learn at your own pace. No timer, instant hints.</div>
+      </div>
+      <div class="mode-btn" data-mode="test" onclick="selectMode('test',this)">
+        <span class="icon">⏱️</span>
+        <div class="label">Test Mode</div>
+        <div class="desc">Simulate the real MAP test with a timer.</div>
+      </div>
+    </div>
+
+    <button class="start-btn" onclick="startQuiz()">🚀 Start Your Adventure!</button>
+
+    <p style="font-size:0.78rem;color:#475569;margin-top:18px;">
+      Based on NWEA MAP Growth standards for Grade 4 / Year 5 &bull; Adaptive difficulty
+    </p>
+    <p style="margin-top:12px"><a href="../index.html" style="color:#6b89c4;font-size:0.8rem;text-decoration:none;">← Back to grade selection</a></p>
+  </div>
+
+  <!-- =========== QUIZ SCREEN =========== -->
+  <div id="quizScreen">
+    <div class="quiz-header">
+      <div class="subject-badge" id="subjectBadge">Math</div>
+      <div class="progress-wrap">
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-text" id="progressText">Question 1 of 20</div>
+      </div>
+      <div class="score-chip" id="scoreChip">0 ⭐</div>
+      <div class="timer-wrap" id="timerWrap">
+        <div class="timer" id="timerDisplay">⏱ 00:00</div>
+      </div>
+    </div>
+
+    <div class="difficulty-row">
+      <span class="diff-label">Difficulty:</span>
+      <span class="diff-stars" id="diffStars">⭐⭐</span>
+      <span class="topic-tag" id="topicTag"></span>
+    </div>
+
+    <div class="streak-banner" id="streakBanner">🔥 Amazing streak!</div>
+
+    <div class="question-card" id="questionCard">
+      <div class="question-num" id="questionNum">Question 1</div>
+      <div class="passage-box hidden" id="passageBox"></div>
+      <div class="question-text" id="questionText"></div>
+      <div class="options-grid" id="optionsGrid"></div>
+    </div>
+
+    <div class="feedback-panel" id="feedbackPanel">
+      <div class="feedback-headline" id="feedbackHeadline"></div>
+      <div class="feedback-explanation" id="feedbackExplanation"></div>
+      <div class="correct-answer-note hidden" id="correctAnswerNote"></div>
+    </div>
+
+    <button class="next-btn hidden" id="nextBtn" onclick="nextQuestion()">Next Question →</button>
+  </div>
+
+  <!-- =========== RESULTS SCREEN =========== -->
+  <div id="resultsScreen">
+    <span class="result-trophy" id="resultTrophy">🏆</span>
+    <h2 class="result-title" id="resultTitle">Great Job!</h2>
+    <div class="result-score-big" id="resultScoreBig">0/0</div>
+    <div class="result-score-label" id="resultScoreLabel">Questions Correct</div>
+    <div class="stars-row" id="resultStars">⭐⭐⭐</div>
+    <p class="result-message" id="resultMessage"></p>
+
+    <div class="breakdown-card">
+      <div class="breakdown-title">Performance by Topic</div>
+      <div id="breakdownRows"></div>
+    </div>
+
+    <div class="result-btns">
+      <button class="result-btn primary" onclick="restartQuiz()">🔄 Play Again</button>
+      <button class="result-btn secondary" id="reviewBtn" onclick="showReview()">👀 Review Mistakes</button>
+    </div>
+    <button class="result-btn secondary" style="width:100%;margin-top:0" onclick="goHome()">🏠 Subject Menu</button>
+    <a href="../index.html" style="display:block;text-align:center;color:#6b89c4;font-size:0.85rem;text-decoration:none;margin-top:10px;">← Back to grade selection</a>
+  </div>
+
+  <!-- =========== REVIEW SCREEN =========== -->
+  <div id="reviewScreen">
+    <div class="review-header">
+      <button class="back-btn" onclick="showResults()">← Back</button>
+      <h2 class="review-title">📖 Review Your Mistakes</h2>
+    </div>
+    <div id="reviewItems"></div>
+  </div>
+
+</div><!-- /app -->
+
+<script>
+// ============================================================
+// QUESTION BANK — 108 verified questions for 4th Grade MAP Test
+// All answers double-checked for accuracy
+// ============================================================
+const QUESTIONS = [
+  // ===================== MATH =====================
+  // --- Place Value & Numbers ---
+  {
+    id:1, subject:'math', topic:'Place Value', difficulty:1,
+    question:'What is the value of the digit 7 in the number 37,256?',
+    options:['7','70','700','7,000'],
+    answer:3,
+    explanation:'In 37,256, we count place values from right to left: ones (6), tens (5), hundreds (2), thousands (7), ten-thousands (3). The digit 7 is in the THOUSANDS place, so its value is 7 × 1,000 = 7,000.'
+  },
+  {
+    id:2, subject:'math', topic:'Place Value', difficulty:1,
+    question:'Which number is 10,000 more than 45,623?',
+    options:['45,723','46,623','55,623','145,623'],
+    answer:2,
+    explanation:'When you add 10,000 to a number, only the ten-thousands digit changes. 45,623 has 4 in the ten-thousands place. 4 + 1 = 5, so 45,623 + 10,000 = 55,623.'
+  },
+  {
+    id:3, subject:'math', topic:'Rounding', difficulty:1,
+    question:'Round 4,752 to the nearest hundred.',
+    options:['4,700','4,800','5,000','4,750'],
+    answer:1,
+    explanation:'To round to the nearest hundred, look at the TENS digit. In 4,752, the tens digit is 5. The rounding rule: if the tens digit is 5 or more, round UP. So 4,752 rounds up to 4,800.'
+  },
+  {
+    id:4, subject:'math', topic:'Place Value', difficulty:1,
+    question:'Which number equals 6,000 + 400 + 30 + 5?',
+    options:['6,435','6,045','60,435','6,000,435'],
+    answer:0,
+    explanation:'This is called expanded form. We add each part: 6,000 (thousands) + 400 (hundreds) + 30 (tens) + 5 (ones) = 6,435. Think of it like stacking LEGOs — each place value piece fits together!'
+  },
+  {
+    id:5, subject:'math', topic:'Addition', difficulty:1,
+    question:'What is 3,456 + 2,789?',
+    options:['6,145','6,245','5,245','6,335'],
+    answer:1,
+    explanation:'Stack the numbers and add column by column from right to left: 6+9=15 (write 5, carry 1), 5+8+1=14 (write 4, carry 1), 4+7+1=12 (write 2, carry 1), 3+2+1=6. Answer: 6,245.'
+  },
+  {
+    id:6, subject:'math', topic:'Subtraction', difficulty:2,
+    question:'What is 5,000 − 1,783?',
+    options:['3,217','3,227','3,117','3,283'],
+    answer:0,
+    explanation:'Use regrouping! 5,000 − 1,783: Starting from ones: we need to borrow all the way. Think of it as 4,999+1 − 1,783: 9−3=6 is wrong let\'s compute directly: 5000−1783 = 5000−1800+17 = 3200+17 = 3217. ✓ Answer: 3,217.'
+  },
+  {
+    id:7, subject:'math', topic:'Comparing Numbers', difficulty:1,
+    question:'Which symbol correctly compares these numbers? 23,456 ___ 23,465',
+    options:['>  (greater than)','<  (less than)','=  (equal to)','The numbers cannot be compared'],
+    answer:1,
+    explanation:'Compare digit by digit from left: 2=2, 3=3, 4=4, 5=5... wait — the ten-thousands, thousands, hundreds are the same! Now look at the tens: 23,456 has 5 in the tens place and 23,465 also has 6 in the tens place. Since 5 < 6, we know 23,456 < 23,465.'
+  },
+  {
+    id:8, subject:'math', topic:'Place Value', difficulty:1,
+    question:'In the number 3,847, which digit is in the HUNDREDS place?',
+    options:['3','8','4','7'],
+    answer:1,
+    explanation:'Count the place values from right to left: 7 is in the ones place, 4 is in the tens place, 8 is in the HUNDREDS place, and 3 is in the thousands place. So the hundreds digit is 8!'
+  },
+
+  // --- Multiplication & Division ---
+  {
+    id:9, subject:'math', topic:'Multiplication', difficulty:1,
+    question:'What is 47 × 6?',
+    options:['252','272','282','292'],
+    answer:2,
+    explanation:'Break it apart: (40 × 6) + (7 × 6) = 240 + 42 = 282. This strategy is called the Distributive Property — split the harder number into easier pieces!'
+  },
+  {
+    id:10, subject:'math', topic:'Multiplication', difficulty:1,
+    question:'What is 124 × 4?',
+    options:['456','476','496','516'],
+    answer:2,
+    explanation:'Break it apart: (100 × 4) + (24 × 4) = 400 + 96 = 496. Check: 4×4=16 (write 6 carry 1), 2×4=8+1=9, 1×4=4. So 496. ✓'
+  },
+  {
+    id:11, subject:'math', topic:'Division', difficulty:1,
+    question:'What is 144 ÷ 12?',
+    options:['11','12','13','14'],
+    answer:1,
+    explanation:'Think of it as: what times 12 equals 144? 12 × 10 = 120. 144 − 120 = 24. 24 ÷ 12 = 2. So 10 + 2 = 12. You can also remember: 12 × 12 = 144 (a great multiplication fact to memorize!).'
+  },
+  {
+    id:12, subject:'math', topic:'Division', difficulty:1,
+    question:'Sam has 135 stickers to share equally among 9 friends. How many stickers will each friend get?',
+    options:['14','15','16','17'],
+    answer:1,
+    explanation:'135 ÷ 9 = ? Think: 9 × 10 = 90. 135 − 90 = 45. 45 ÷ 9 = 5. So 10 + 5 = 15 stickers per friend. Check: 9 × 15 = 135. ✓'
+  },
+  {
+    id:13, subject:'math', topic:'Multiplication', difficulty:1,
+    question:'A classroom has 6 rows of 8 desks. How many desks are there in total?',
+    options:['42','46','48','52'],
+    answer:2,
+    explanation:'Total desks = rows × desks per row = 6 × 8 = 48. This is a multiplication array — rows and columns multiply together!'
+  },
+  {
+    id:14, subject:'math', topic:'Multiplication', difficulty:2,
+    question:'What is 367 × 5?',
+    options:['1,835','1,735','1,845','1,725'],
+    answer:0,
+    explanation:'Multiply each digit: 7×5=35 (write 5, carry 3), 6×5=30+3=33 (write 3, carry 3), 3×5=15+3=18. Result: 1,835. Check: 300×5=1,500; 67×5=335; 1,500+335=1,835. ✓'
+  },
+  {
+    id:15, subject:'math', topic:'Division', difficulty:1,
+    question:'What is 84 ÷ 7?',
+    options:['11','12','13','14'],
+    answer:1,
+    explanation:'7 × 12 = 84. You can also think: 7 × 10 = 70; 84 − 70 = 14; 14 ÷ 7 = 2; so 10 + 2 = 12. Always check by multiplying back: 7 × 12 = 84. ✓'
+  },
+  {
+    id:16, subject:'math', topic:'Multiplication', difficulty:2,
+    question:'What is 23 × 12?',
+    options:['246','276','256','286'],
+    answer:1,
+    explanation:'Use expanded multiplication: 23 × 12 = 23 × 10 + 23 × 2 = 230 + 46 = 276. Or use the standard algorithm: 23×2=46, 23×10=230, add them: 276. ✓'
+  },
+
+  // --- Fractions ---
+  {
+    id:17, subject:'math', topic:'Equivalent Fractions', difficulty:1,
+    question:'Which fraction is equivalent to 1/2?',
+    options:['2/3','3/6','4/10','3/8'],
+    answer:1,
+    explanation:'A fraction is equivalent when it represents the same amount. 3/6 = 1/2 because 3÷6 = 0.5, just like 1÷2 = 0.5. Think of a pizza: 1 out of 2 slices is the same as 3 out of 6 slices! You can also check: multiply numerator and denominator of 1/2 by 3: (1×3)/(2×3) = 3/6. ✓'
+  },
+  {
+    id:18, subject:'math', topic:'Comparing Fractions', difficulty:2,
+    question:'Which fraction is GREATER than 1/2?',
+    options:['2/6','3/8','5/8','1/4'],
+    answer:2,
+    explanation:'Convert to decimals: 1/2 = 0.5, 2/6 ≈ 0.333, 3/8 = 0.375, 5/8 = 0.625, 1/4 = 0.25. Only 5/8 (0.625) is greater than 1/2 (0.5). A quick trick: with 5/8, the numerator (5) is more than half of the denominator (8), so it\'s greater than 1/2!'
+  },
+  {
+    id:19, subject:'math', topic:'Adding Fractions', difficulty:1,
+    question:'What is 1/4 + 2/4?',
+    options:['3/8','2/4','3/4','4/8'],
+    answer:2,
+    explanation:'When fractions have the SAME denominator (bottom number), just add the numerators (top numbers): 1 + 2 = 3. Keep the denominator: 3/4. Think of it like pieces of pie: 1 slice + 2 slices = 3 slices, all out of 4.'
+  },
+  {
+    id:20, subject:'math', topic:'Adding Fractions', difficulty:1,
+    question:'What is 3/5 + 1/5?',
+    options:['4/10','4/5','3/5','5/5'],
+    answer:1,
+    explanation:'Same denominators (both /5), so just add the numerators: 3 + 1 = 4. Answer: 4/5. Note: 5/5 would equal 1 whole, which would mean all 5 pieces — but we only have 4 out of 5.'
+  },
+  {
+    id:21, subject:'math', topic:'Subtracting Fractions', difficulty:1,
+    question:'What is 5/6 − 2/6?',
+    options:['3/6','3/12','1/6','7/6'],
+    answer:0,
+    explanation:'Same denominators (both /6): subtract numerators only. 5 − 2 = 3. Answer: 3/6 (which can also be simplified to 1/2). Never subtract denominators — only subtract numerators when the bottom numbers match!'
+  },
+  {
+    id:22, subject:'math', topic:'Ordering Fractions', difficulty:1,
+    question:'Order these fractions from LEAST to GREATEST: 3/4, 1/4, 2/4',
+    options:['3/4, 2/4, 1/4','1/4, 2/4, 3/4','2/4, 1/4, 3/4','1/4, 3/4, 2/4'],
+    answer:1,
+    explanation:'Since all fractions have the same denominator (4), just compare the numerators: 1 < 2 < 3. So ordered from least to greatest: 1/4, 2/4, 3/4. Think of it as 1 slice, 2 slices, 3 slices — all from the same-sized pie cut into 4 pieces.'
+  },
+  {
+    id:23, subject:'math', topic:'Mixed Numbers', difficulty:2,
+    question:'What mixed number equals 7/3?',
+    options:['1 1/3','2 1/3','1 2/3','2 2/3'],
+    answer:1,
+    explanation:'Divide: 7 ÷ 3 = 2 remainder 1. So 7/3 = 2 whole groups of 3, with 1 left over. The mixed number is 2 1/3. Check: 2 × 3 + 1 = 7. ✓ So 7/3 = 2 1/3.'
+  },
+  {
+    id:24, subject:'math', topic:'Improper Fractions', difficulty:2,
+    question:'Which improper fraction equals 2 3/4?',
+    options:['5/4','9/4','11/4','6/4'],
+    answer:2,
+    explanation:'To convert a mixed number to an improper fraction: multiply the whole number by the denominator, then add the numerator. 2 × 4 = 8; 8 + 3 = 11. Keep the denominator: 11/4. Check: 11÷4 = 2 remainder 3 = 2 3/4. ✓'
+  },
+  {
+    id:25, subject:'math', topic:'Decimal Fractions', difficulty:2,
+    question:'Which decimal represents 3/10?',
+    options:['0.03','3.0','0.3','0.003'],
+    answer:2,
+    explanation:'The fraction 3/10 means 3 tenths. In decimal notation, the tenths place is the first digit after the decimal point: 0.3. You can verify: 3 ÷ 10 = 0.3. If it were 3/100, it would be 0.03.'
+  },
+
+  // --- Algebraic Thinking ---
+  {
+    id:26, subject:'math', topic:'Patterns', difficulty:1,
+    question:'What comes next in this pattern? 5, 10, 15, 20, ___',
+    options:['22','25','24','30'],
+    answer:1,
+    explanation:'Each number increases by 5: 5, 10, 15, 20, 25. This is counting by 5s! The rule is "add 5" each time. So the next number is 20 + 5 = 25.'
+  },
+  {
+    id:27, subject:'math', topic:'Patterns', difficulty:2,
+    question:'What is the rule for this pattern? 3, 6, 12, 24, ...',
+    options:['Add 3','Multiply by 2','Add 6','Multiply by 3'],
+    answer:1,
+    explanation:'Check each step: 3 × 2 = 6 ✓, 6 × 2 = 12 ✓, 12 × 2 = 24 ✓. The rule is "multiply by 2" (also called doubling). If the rule were "add 3", we\'d get 3, 6, 9, 12 — not the same!'
+  },
+  {
+    id:28, subject:'math', topic:'Multiplicative Comparisons', difficulty:2,
+    question:'Jake has 3 times as many marbles as Lily. If Lily has 15 marbles, how many does Jake have?',
+    options:['18','30','45','60'],
+    answer:2,
+    explanation:'"3 times as many" means multiply: Jake = 3 × Lily = 3 × 15 = 45. If Jake has 3 times MORE, he has three groups of 15: 15 + 15 + 15 = 45 marbles.'
+  },
+  {
+    id:29, subject:'math', topic:'Factors & Multiples', difficulty:1,
+    question:'Which of the following is a MULTIPLE of 6?',
+    options:['21','26','36','46'],
+    answer:2,
+    explanation:'Multiples of 6 are numbers you get when multiplying 6 by whole numbers: 6, 12, 18, 24, 30, 36, 42... 36 = 6 × 6 ✓. Check the others: 21÷6=3.5 (not whole), 26÷6≈4.3 (not whole), 46÷6≈7.7 (not whole). Only 36 works!'
+  },
+  {
+    id:30, subject:'math', topic:'Factors & Multiples', difficulty:1,
+    question:'Which of the following is a FACTOR of 24?',
+    options:['5','7','8','9'],
+    answer:2,
+    explanation:'A factor divides evenly into a number. 24 ÷ 8 = 3 ✓. Factors of 24 are: 1, 2, 3, 4, 6, 8, 12, 24. Check others: 24÷5=4.8 (not even), 24÷7≈3.4 (not even), 24÷9≈2.7 (not even). Only 8 works!'
+  },
+  {
+    id:31, subject:'math', topic:'Patterns', difficulty:2,
+    question:'What comes next? 2, 4, 8, 16, ___',
+    options:['18','24','32','20'],
+    answer:2,
+    explanation:'Each number doubles: 2×2=4, 4×2=8, 8×2=16, 16×2=32. The rule is "multiply by 2." These are called powers of 2: 2¹=2, 2²=4, 2³=8, 2⁴=16, 2⁵=32!'
+  },
+  {
+    id:32, subject:'math', topic:'Algebraic Thinking', difficulty:2,
+    question:'What is the missing number? 4 × ___ = 36',
+    options:['7','8','9','10'],
+    answer:2,
+    explanation:'We need a number that when multiplied by 4 gives 36. Divide: 36 ÷ 4 = 9. Check: 4 × 9 = 36 ✓. This is the relationship between multiplication and division — they are inverse operations!'
+  },
+
+  // --- Measurement & Data ---
+  {
+    id:33, subject:'math', topic:'Measurement', difficulty:2,
+    question:'A ribbon is 3 feet 7 inches long. How many inches is that in total?',
+    options:['37 inches','43 inches','40 inches','45 inches'],
+    answer:1,
+    explanation:'There are 12 inches in 1 foot. So 3 feet = 3 × 12 = 36 inches. Add the extra 7 inches: 36 + 7 = 43 inches total. Remember: 1 foot = 12 inches is a key measurement fact!'
+  },
+  {
+    id:34, subject:'math', topic:'Elapsed Time', difficulty:2,
+    question:'A movie starts at 2:15 PM and ends at 4:50 PM. How long is the movie?',
+    options:['2 hours 15 minutes','2 hours 35 minutes','3 hours','2 hours 45 minutes'],
+    answer:1,
+    explanation:'Count forward from 2:15 PM: +2 hours = 4:15 PM. Then count from 4:15 to 4:50 = +35 minutes. Total: 2 hours 35 minutes. You can also subtract: 4:50 − 2:15 = 2:35 (2 hours and 35 minutes).'
+  },
+  {
+    id:35, subject:'math', topic:'Area', difficulty:1,
+    question:'A rectangle has a length of 8 cm and a width of 5 cm. What is its area?',
+    options:['26 cm','40 sq cm','13 sq cm','80 sq cm'],
+    answer:1,
+    explanation:'Area of a rectangle = length × width = 8 × 5 = 40 square centimeters. Area is always measured in SQUARE units (sq cm, sq in, sq ft). The perimeter would be 2×(8+5)=26 cm — a different measurement!'
+  },
+  {
+    id:36, subject:'math', topic:'Perimeter', difficulty:1,
+    question:'A square has sides of 6 inches each. What is its perimeter?',
+    options:['12 inches','36 square inches','24 inches','30 inches'],
+    answer:2,
+    explanation:'Perimeter is the total distance around the outside. A square has 4 equal sides. Perimeter = 4 × side = 4 × 6 = 24 inches. Note: 36 square inches would be the AREA, not perimeter!'
+  },
+  {
+    id:37, subject:'math', topic:'Angles', difficulty:2,
+    question:'A rectangle has a perimeter of 30 cm. One side is 8 cm long. What is the length of the OTHER side?',
+    options:['7 cm','14 cm','22 cm','4 cm'],
+    answer:0,
+    explanation:'A rectangle has 2 pairs of equal sides. Perimeter formula: P = 2 × (length + width). So: 30 = 2 × (8 + w). Divide both sides by 2: 15 = 8 + w. Subtract 8: w = 7 cm. Check: 2×(8+7)=2×15=30 ✓'
+  },
+  {
+    id:38, subject:'math', topic:'Measurement', difficulty:1,
+    question:'How many milliliters are in 3 liters?',
+    options:['30','300','3,000','30,000'],
+    answer:2,
+    explanation:'The prefix "milli-" means 1,000. So 1 liter = 1,000 milliliters. Therefore, 3 liters = 3 × 1,000 = 3,000 milliliters. Remember: kilo=1,000 large units; milli=1/1,000 of a unit.'
+  },
+
+  // --- Geometry ---
+  {
+    id:39, subject:'math', topic:'Geometry', difficulty:1,
+    question:'How many sides does a hexagon have?',
+    options:['5','6','7','8'],
+    answer:1,
+    explanation:'Hex- means 6 in Greek! A hexagon has 6 sides. Memory trick: Pentagon=5, Hexagon=6, Heptagon=7, Octagon=8. You see hexagons in honeycombs — bees are great at geometry!'
+  },
+  {
+    id:40, subject:'math', topic:'Geometry', difficulty:1,
+    question:'Which shape ALWAYS has exactly 4 right angles (90° corners)?',
+    options:['Triangle','Pentagon','Rectangle','Rhombus'],
+    answer:2,
+    explanation:'A rectangle (including squares) always has 4 right angles — each corner forms a perfect 90° angle. A rhombus has 4 equal sides but its angles are NOT necessarily 90°. Triangles have 3 angles, pentagons have 5.'
+  },
+  {
+    id:41, subject:'math', topic:'Angles', difficulty:2,
+    question:'Which type of angle measures BETWEEN 90° and 180°?',
+    options:['Acute angle','Right angle','Obtuse angle','Straight angle'],
+    answer:2,
+    explanation:'Angle types: Acute = less than 90° (sharp, like a), Right = exactly 90° (like a corner of a book), Obtuse = between 90° and 180° (wide, blunt), Straight = exactly 180° (a flat line). So an obtuse angle is wider than a right angle but not yet a straight line.'
+  },
+  {
+    id:42, subject:'math', topic:'Symmetry', difficulty:2,
+    question:'How many lines of symmetry does a SQUARE have?',
+    options:['2','3','4','8'],
+    answer:2,
+    explanation:'A square has 4 lines of symmetry: one horizontal (left-right), one vertical (top-bottom), and two diagonal lines. You can fold a square along any of these 4 lines and both halves will match perfectly. A rectangle (non-square) only has 2.'
+  },
+
+  // --- Additional Math ---
+  {
+    id:43, subject:'math', topic:'Division', difficulty:2,
+    question:'Mrs. Johnson baked 48 cookies. She puts them into bags with 6 cookies each. How many bags does she need?',
+    options:['7','8','9','10'],
+    answer:1,
+    explanation:'48 ÷ 6 = 8 bags. Check: 6 × 8 = 48 ✓. This is a division word problem — "sharing equally" or "grouping" always uses division!'
+  },
+  {
+    id:44, subject:'math', topic:'Number Patterns', difficulty:3,
+    question:'The temperature was −3°F in the morning. By noon it rose to 12°F. How many degrees did it rise?',
+    options:['9°F','15°F','12°F','10°F'],
+    answer:1,
+    explanation:'To find the change, subtract: 12 − (−3) = 12 + 3 = 15°F. When you subtract a negative number, it\'s the same as adding! Picture a number line: starting at −3 and going to +12, you travel 15 steps total.'
+  },
+  {
+    id:45, subject:'math', topic:'Fractions', difficulty:3,
+    question:'What is 7/10 written as a decimal?',
+    options:['7.0','0.07','0.7','70.0'],
+    answer:2,
+    explanation:'7/10 means "7 tenths." In decimal form, the tenths place is the first digit after the decimal point: 0.7. You can verify: 7 ÷ 10 = 0.7. If it were 7/100 (hundredths), it would be 0.07.'
+  },
+  {
+    id:46, subject:'math', topic:'Multiplication', difficulty:3,
+    question:'There are 18 boxes. Each box contains 26 pencils. How many pencils are there in total?',
+    options:['108','208','468','508'],
+    answer:2,
+    explanation:'18 × 26: Break it up! 18 × 20 = 360, and 18 × 6 = 108. Then 360 + 108 = 468. Check another way: 20 × 26 = 520, minus 2 × 26 = 52, so 520 − 52 = 468. ✓'
+  },
+  {
+    id:47, subject:'math', topic:'Rounding', difficulty:2,
+    question:'Sophia flew 2,448 miles. What is this rounded to the nearest THOUSAND?',
+    options:['2,000','2,400','2,500','3,000'],
+    answer:0,
+    explanation:'To round to the nearest thousand, look at the HUNDREDS digit. In 2,448 the hundreds digit is 4. Since 4 < 5, we round DOWN — keep the thousands digit and replace the rest with zeros: 2,000.'
+  },
+
+  // ===================== READING =====================
+  // --- Vocabulary ---
+  {
+    id:48, subject:'reading', topic:'Vocabulary', difficulty:1,
+    question:'Which word is most similar in meaning to "enormous"?',
+    options:['tiny','huge','loud','fast'],
+    answer:1,
+    explanation:'"Enormous" means extremely large or huge. So "huge" is the best synonym. Synonyms are words with similar meanings. Antonyms (opposites) of enormous would be: tiny, small, or miniature.'
+  },
+  {
+    id:49, subject:'reading', topic:'Vocabulary', difficulty:1,
+    question:'What does the word "persevere" mean?',
+    options:['to give up when things get hard','to keep trying even when it is difficult','to pretend you understand','to confuse others'],
+    answer:1,
+    explanation:'"Persevere" means to keep going even when things are difficult. It comes from the Latin word "perseverare." Athletes and students who persevere push through challenges and don\'t give up. Heroes in stories often persevere!'
+  },
+  {
+    id:50, subject:'reading', topic:'Vocabulary', difficulty:1,
+    question:'Which word is the OPPOSITE (antonym) of "courageous"?',
+    options:['brave','bold','timid','strong'],
+    answer:2,
+    explanation:'"Courageous" means brave. Its opposite (antonym) is "timid," which means shy or afraid. Brave/bold/courageous/daring are all synonyms. Timid/fearful/cowardly are all antonyms.'
+  },
+  {
+    id:51, subject:'reading', topic:'Word Parts', difficulty:2,
+    question:'What does the prefix "un-" usually mean?',
+    options:['before','after','not or opposite of','again'],
+    answer:2,
+    explanation:'The prefix "un-" means "not" or "opposite of." Examples: unhappy = not happy, unlock = opposite of lock, unfair = not fair, uncertain = not certain. Knowing prefixes helps you figure out unfamiliar words!'
+  },
+  {
+    id:52, subject:'reading', topic:'Word Parts', difficulty:2,
+    question:'What does the suffix "-ful" mean in the word "grateful"?',
+    options:['without','full of or having a quality','too much','before'],
+    answer:1,
+    explanation:'The suffix "-ful" means "full of" or "having a quality of." Grateful = full of gratitude. Other examples: thankful = full of thanks, beautiful = full of beauty, helpful = full of help, careful = full of care.'
+  },
+  {
+    id:53, subject:'reading', topic:'Vocabulary', difficulty:2,
+    question:'In the sentence "Food was scarce during the long winter," what does "scarce" mean?',
+    options:['plentiful and easy to find','hard to find because there is very little','stored away for later','only found in warm places'],
+    answer:1,
+    explanation:'"Scarce" means in very short supply — rare or hard to find. You can use context clues: the sentence says it was a "long winter," which hints that food would be harder to find. Synonyms: rare, limited, sparse. Antonym: abundant.'
+  },
+  {
+    id:54, subject:'reading', topic:'Vocabulary', difficulty:2,
+    question:'What is an ANTONYM (opposite) of "ancient"?',
+    options:['old','historic','modern','faded'],
+    answer:2,
+    explanation:'"Ancient" means very, very old (like ancient Egypt or ancient dinosaurs). Its opposite is "modern," which means new or current. Other antonyms: new, recent, contemporary. Note: "old" and "historic" are actually synonyms of ancient!'
+  },
+
+  // --- Informational Text: The Honeybee ---
+  {
+    id:55, subject:'reading', topic:'Main Idea', difficulty:1,
+    passage:'Honeybees are amazing insects that live in large groups called colonies. A colony can have up to 60,000 bees! Each bee has a special job. The queen bee lays eggs. Worker bees collect nectar from flowers and turn it into honey. Drone bees mate with the queen. Honeybees communicate by doing a special "waggle dance" that tells other bees where to find flowers. Without honeybees, many plants could not reproduce, because bees carry pollen from one flower to another.',
+    question:'What is the MAIN IDEA of this passage?',
+    options:[
+      'Honeybees are dangerous insects that should be avoided.',
+      'Honeybees are remarkable insects that play important roles in nature.',
+      'Queen bees are the most important members of a colony.',
+      'Honey is made only by worker bees.'
+    ],
+    answer:1,
+    explanation:'The main idea is what the WHOLE passage is mostly about — not just one detail. The passage begins with "Honeybees are amazing insects" and covers many different facts about their roles. Option B captures this big idea. The other choices are just details from the passage.'
+  },
+  {
+    id:56, subject:'reading', topic:'Key Details', difficulty:1,
+    passage:'Honeybees are amazing insects that live in large groups called colonies. A colony can have up to 60,000 bees! Each bee has a special job. The queen bee lays eggs. Worker bees collect nectar from flowers and turn it into honey. Drone bees mate with the queen. Honeybees communicate by doing a special "waggle dance" that tells other bees where to find flowers. Without honeybees, many plants could not reproduce, because bees carry pollen from one flower to another.',
+    question:'According to the passage, what is the purpose of the "waggle dance"?',
+    options:[
+      'To attract a mate',
+      'To celebrate making honey',
+      'To show other bees where to find flowers',
+      'To warn the colony about danger'
+    ],
+    answer:2,
+    explanation:'The passage directly states: "Honeybees communicate by doing a special \'waggle dance\' that tells other bees where to find flowers." This is a key detail question — the answer is stated in the text. Always look for signal phrases like "according to the passage."'
+  },
+  {
+    id:57, subject:'reading', topic:'Inference', difficulty:2,
+    passage:'Honeybees are amazing insects that live in large groups called colonies. A colony can have up to 60,000 bees! Each bee has a special job. The queen bee lays eggs. Worker bees collect nectar from flowers and turn it into honey. Drone bees mate with the queen. Honeybees communicate by doing a special "waggle dance" that tells other bees where to find flowers. Without honeybees, many plants could not reproduce, because bees carry pollen from one flower to another.',
+    question:'Based on the last sentence, what can you INFER?',
+    options:[
+      'Honeybees are pests to farmers.',
+      'Many plants would struggle to survive without honeybees.',
+      'Flowers make their own pollen without help.',
+      'Bees only like certain types of flowers.'
+    ],
+    answer:1,
+    explanation:'An inference is a conclusion you draw using clues from the text. The passage says "without honeybees, many plants could not reproduce." This means if bees disappeared, plants would struggle — they NEED bees. You use the text clue + your own thinking to make this inference.'
+  },
+  {
+    id:58, subject:'reading', topic:"Author's Purpose", difficulty:2,
+    passage:'Honeybees are amazing insects that live in large groups called colonies. A colony can have up to 60,000 bees! Each bee has a special job. The queen bee lays eggs. Worker bees collect nectar from flowers and turn it into honey. Drone bees mate with the queen. Honeybees communicate by doing a special "waggle dance" that tells other bees where to find flowers. Without honeybees, many plants could not reproduce, because bees carry pollen from one flower to another.',
+    question:"What is the author's main PURPOSE in writing this passage?",
+    options:[
+      'To entertain readers with a funny bee story',
+      'To persuade readers to become beekeepers',
+      'To inform readers about honeybees and their importance',
+      'To describe how to make honey at home'
+    ],
+    answer:2,
+    explanation:"Author's purpose is WHY the author wrote the passage. Remember the acronym PIE: Persuade, Inform, Entertain. This passage shares facts about bees (their jobs, communication, importance) — it's all informational, so the purpose is TO INFORM."
+  },
+
+  // --- Informational Text: The Arctic Fox ---
+  {
+    id:59, subject:'reading', topic:'Key Details', difficulty:1,
+    passage:"The Arctic fox is one of nature's great survivors. Its thick, white fur coat provides warmth in freezing temperatures AND works as camouflage in the snow. In summer, the fox's coat turns brown or gray to blend with rocks and plants. Arctic foxes eat small animals, birds, and berries. When food is scarce in winter, they follow polar bears and eat the scraps left behind. Arctic foxes can hear prey moving under the snow and dive headfirst to catch them!",
+    question:"How does the Arctic fox's fur help it survive? (Choose the BEST answer)",
+    options:[
+      'It keeps the fox warm only.',
+      'It only helps the fox with camouflage.',
+      'It keeps the fox warm AND helps with camouflage.',
+      'It helps the fox swim faster.'
+    ],
+    answer:2,
+    explanation:'The passage says the fur coat "provides warmth in freezing temperatures AND works as camouflage." The word AND tells us the fur does TWO things. Always look for multiple details that support an answer — the best answer includes ALL relevant information!'
+  },
+  {
+    id:60, subject:'reading', topic:'Vocabulary in Context', difficulty:2,
+    passage:"The Arctic fox is one of nature's great survivors. Its thick, white fur coat provides warmth in freezing temperatures AND works as camouflage in the snow. In summer, the fox's coat turns brown or gray to blend with rocks and plants. Arctic foxes eat small animals, birds, and berries. When food is scarce in winter, they follow polar bears and eat the scraps left behind. Arctic foxes can hear prey moving under the snow and dive headfirst to catch them!",
+    question:'In this passage, what does the word "camouflage" most likely mean?',
+    options:[
+      'making a loud noise to scare predators',
+      'blending in with the surroundings to hide',
+      'attracting other animals to come closer',
+      'keeping warm in cold weather'
+    ],
+    answer:1,
+    explanation:'Use CONTEXT CLUES! The passage says the white fur "works as camouflage in the snow." Then it says the coat "turns brown or gray to blend with rocks and plants." The word "blend" is a huge clue — camouflage means blending in to hide. White hides in snow; brown hides in dirt/rocks!'
+  },
+  {
+    id:61, subject:'reading', topic:'Key Details', difficulty:1,
+    passage:"The Arctic fox is one of nature's great survivors. Its thick, white fur coat provides warmth in freezing temperatures AND works as camouflage in the snow. In summer, the fox's coat turns brown or gray to blend with rocks and plants. Arctic foxes eat small animals, birds, and berries. When food is scarce in winter, they follow polar bears and eat the scraps left behind. Arctic foxes can hear prey moving under the snow and dive headfirst to catch them!",
+    question:"What color does the Arctic fox's coat become in SUMMER?",
+    options:['White','Black','Brown or gray','Orange'],
+    answer:2,
+    explanation:"The passage states: 'In summer, the fox's coat turns brown or gray to blend with rocks and plants.' This is a detail question — the answer is directly in the text. In summer, there is less snow, so white would actually make the fox MORE visible, not less!"
+  },
+  {
+    id:62, subject:'reading', topic:'Inference', difficulty:2,
+    passage:"The Arctic fox is one of nature's great survivors. Its thick, white fur coat provides warmth in freezing temperatures AND works as camouflage in the snow. In summer, the fox's coat turns brown or gray to blend with rocks and plants. Arctic foxes eat small animals, birds, and berries. When food is scarce in winter, they follow polar bears and eat the scraps left behind. Arctic foxes can hear prey moving under the snow and dive headfirst to catch them!",
+    question:'Why do Arctic foxes follow polar bears in winter?',
+    options:[
+      'They are afraid of polar bears and try to stay close for protection.',
+      'They enjoy the company of polar bears.',
+      'They want to stay warm near polar bears.',
+      'They can find food more easily by eating what polar bears leave behind.'
+    ],
+    answer:3,
+    explanation:'The passage says: "When food is scarce in winter, they follow polar bears and eat the scraps left behind." The key word is "when food is scarce" — the foxes are hungry and following polar bears gives them access to leftover food. This is a survival strategy!'
+  },
+
+  // --- Informational Text: The Water Cycle ---
+  {
+    id:63, subject:'reading', topic:'Main Idea', difficulty:2,
+    passage:'The water cycle is the continuous movement of water on Earth. It starts when the sun heats water in oceans, lakes, and rivers, causing it to evaporate — turning from liquid to water vapor that rises into the air. As the vapor rises, it cools and turns back into tiny water droplets, forming clouds. This process is called condensation. When clouds hold too much water, the water falls back to Earth as precipitation — rain, snow, sleet, or hail. The water then flows into rivers and oceans, or soaks into the ground, and the cycle begins again.',
+    question:'What is the MAIN IDEA of this passage?',
+    options:[
+      'Rain and snow fall from clouds.',
+      'The sun is the most important part of weather.',
+      'Water continuously moves through a cycle on Earth.',
+      'Oceans are the largest source of water vapor.'
+    ],
+    answer:2,
+    explanation:'The very first sentence tells you the main idea: "The water cycle is the continuous movement of water on Earth." The rest of the passage gives the details of HOW water moves. A good main idea covers the ENTIRE passage, not just one part of it.'
+  },
+  {
+    id:64, subject:'reading', topic:'Key Details', difficulty:1,
+    passage:'The water cycle is the continuous movement of water on Earth. It starts when the sun heats water in oceans, lakes, and rivers, causing it to evaporate — turning from liquid to water vapor that rises into the air. As the vapor rises, it cools and turns back into tiny water droplets, forming clouds. This process is called condensation. When clouds hold too much water, the water falls back to Earth as precipitation — rain, snow, sleet, or hail. The water then flows into rivers and oceans, or soaks into the ground, and the cycle begins again.',
+    question:'What is "condensation" in the water cycle?',
+    options:[
+      'Water evaporating from the ocean',
+      'Rain falling from clouds',
+      'Water vapor cooling and turning back into water droplets',
+      'Water soaking into the ground'
+    ],
+    answer:2,
+    explanation:'The passage defines condensation directly: "As the vapor rises, it cools and turns back into tiny water droplets, forming clouds. This process is called condensation." Water vapor → water droplets = condensation. Evaporation is the OPPOSITE: liquid → vapor.'
+  },
+  {
+    id:65, subject:'reading', topic:'Text Features', difficulty:2,
+    passage:'The water cycle is the continuous movement of water on Earth. It starts when the sun heats water in oceans, lakes, and rivers, causing it to evaporate — turning from liquid to water vapor that rises into the air. As the vapor rises, it cools and turns back into tiny water droplets, forming clouds. This process is called condensation. When clouds hold too much water, the water falls back to Earth as precipitation — rain, snow, sleet, or hail. The water then flows into rivers and oceans, or soaks into the ground, and the cycle begins again.',
+    question:'Which text feature would BEST help a reader understand the water cycle described in this passage?',
+    options:[
+      'A timeline showing historical floods',
+      'A labeled diagram showing the stages of the water cycle',
+      'A bar graph of rainfall amounts',
+      'A map of the world\'s oceans'
+    ],
+    answer:1,
+    explanation:'Since the water cycle is a process with stages (evaporation → condensation → precipitation → collection), a labeled DIAGRAM would best show how each stage connects to the next. Text features like diagrams, charts, and maps help readers visualize information that is hard to picture from words alone.'
+  },
+
+  // --- Literary Elements & Figurative Language ---
+  {
+    id:66, subject:'reading', topic:'Figurative Language', difficulty:1,
+    question:'What does the idiom "break a leg" mean?',
+    options:['to actually break your leg','good luck','run as fast as you can','work very hard'],
+    answer:1,
+    explanation:'"Break a leg" is an idiom — a phrase whose meaning is different from its literal words. When you tell a performer to "break a leg" before a show, you\'re wishing them good luck! Idioms are cultural expressions you have to learn. Other idioms: "It\'s raining cats and dogs" (raining heavily), "piece of cake" (easy).'
+  },
+  {
+    id:67, subject:'reading', topic:'Figurative Language', difficulty:1,
+    question:'"The stars were diamonds scattered across the sky." This sentence is an example of which literary device?',
+    options:['Simile','Alliteration','Metaphor','Personification'],
+    answer:2,
+    explanation:'A METAPHOR says something IS something else (without using "like" or "as"). Here, stars ARE diamonds — they\'re not actually diamonds, but the comparison creates a vivid image. A SIMILE would say "stars were LIKE diamonds." The difference: metaphor=direct comparison, simile=uses like/as.'
+  },
+  {
+    id:68, subject:'reading', topic:'Figurative Language', difficulty:1,
+    question:'"She was as quiet as a mouse during the test." This is an example of:',
+    options:['Metaphor','Simile','Idiom','Personification'],
+    answer:1,
+    explanation:'A SIMILE compares two things using "like" or "as." This sentence uses "as quiet as a mouse" — comparing the girl\'s quietness to a mouse using "as." Quick trick: SIMILE has the letter i, and so does LiKe and As. Look for like/as to spot a simile!'
+  },
+  {
+    id:69, subject:'reading', topic:'Theme', difficulty:2,
+    question:'A story follows a boy who practices piano every day for a year, despite wanting to quit. He then wins a music competition. What is the most likely THEME?',
+    options:[
+      'Music competitions are too stressful for children.',
+      'Hard work and persistence lead to success.',
+      'Boys are better at music than girls.',
+      'Piano is the best instrument to learn.'
+    ],
+    answer:1,
+    explanation:'The THEME is the big life lesson or message of a story — not what happens (plot), but what we should learn. This story\'s pattern: works hard despite wanting to quit → wins competition = the lesson is about persistence and hard work paying off. Themes are universal life lessons, not just about one character.'
+  },
+  {
+    id:70, subject:'reading', topic:'Plot Structure', difficulty:1,
+    question:'In a story\'s plot, the most exciting and tense moment — where the main conflict comes to a head — is called the:',
+    options:['Exposition','Rising Action','Climax','Resolution'],
+    answer:2,
+    explanation:'Plot structure has 5 parts: 1) Exposition (setting/characters introduced), 2) Rising Action (problem builds), 3) CLIMAX (most exciting moment — peak of tension!), 4) Falling Action (things wind down), 5) Resolution (problem solved). The climax is the turning point — like the final battle in an adventure story!'
+  },
+  {
+    id:71, subject:'reading', topic:'Figurative Language', difficulty:2,
+    question:'Which sentence is an example of PERSONIFICATION?',
+    options:[
+      'The big dog ran fast through the yard.',
+      'The wind whispered secrets through the trees.',
+      'The cat was as soft as a cloud.',
+      'He was a lion on the soccer field.'
+    ],
+    answer:1,
+    explanation:'PERSONIFICATION gives human qualities to non-human things. Winds can\'t actually whisper — that\'s a human action. By saying the wind "whispered," the author gives it a human quality, making the description more vivid and poetic. Metaphor example (C): comparing cat to cloud. Simile: the cat was like a cloud.'
+  },
+  {
+    id:72, subject:'reading', topic:'Poetry', difficulty:1,
+    question:'In a poem, a STANZA is:',
+    options:[
+      'A single line in a poem',
+      'A group of lines in a poem, like a paragraph',
+      'The rhyme scheme of a poem',
+      'The title of a poem'
+    ],
+    answer:1,
+    explanation:'A STANZA is to poetry what a paragraph is to prose — a group of related lines. Poems are divided into stanzas to organize ideas. A stanza can have 2 lines (couplet), 4 lines (quatrain), or any number. Count the blank lines between groups of text to find stanza breaks!'
+  },
+  {
+    id:73, subject:'reading', topic:'Point of View', difficulty:2,
+    question:'A story is told in FIRST-PERSON point of view. Which pronouns would the narrator use?',
+    options:['He / She / They','You / Your','I / Me / My / We','One / Oneself'],
+    answer:2,
+    explanation:'FIRST-PERSON: The narrator is IN the story and uses "I, me, my, we." They tell what they personally see and feel. THIRD-PERSON: Someone outside uses "he, she, they." SECOND-PERSON: Uses "you" (like in instructions or choose-your-own-adventure books). "I went to the store" = first person!'
+  },
+  {
+    id:74, subject:'reading', topic:'Point of View', difficulty:2,
+    question:'What does "point of view" mean when talking about a story?',
+    options:[
+      'Where the story takes place',
+      'The perspective (viewpoint) from which the story is told',
+      'The main theme or lesson of the story',
+      'The type of language the author uses'
+    ],
+    answer:1,
+    explanation:'POINT OF VIEW is the perspective through which a story is told — "whose eyes" are we seeing the story through? It affects what information the reader gets. A first-person narrator can only tell what THEY see; a third-person narrator might know everyone\'s thoughts (omniscient).'
+  },
+  {
+    id:75, subject:'reading', topic:'Figurative Language', difficulty:2,
+    question:'"I have told you a MILLION times to clean your room!" This is an example of:',
+    options:['Simile','Metaphor','Hyperbole','Alliteration'],
+    answer:2,
+    explanation:'HYPERBOLE is a huge exaggeration used for dramatic effect (not meant to be taken literally). Nobody has ACTUALLY said something a million times! Hyperboles are exaggerations that emphasize a feeling or idea. More examples: "I\'m so hungry I could eat a horse," "This backpack weighs a ton!"'
+  },
+  {
+    id:76, subject:'reading', topic:'Setting', difficulty:1,
+    question:'The SETTING of a story refers to:',
+    options:[
+      'The problem or conflict in the story',
+      'The time AND place where the story happens',
+      'The main characters and their traits',
+      'The lesson or moral of the story'
+    ],
+    answer:1,
+    explanation:'The SETTING includes BOTH the time (year, season, time of day) AND the place (city, school, forest, planet). Setting can greatly affect a story — a mystery in a haunted house feels very different from one in a sunny park. Always look for WHERE and WHEN to identify setting.'
+  },
+  {
+    id:77, subject:'reading', topic:'Text Features', difficulty:1,
+    question:'In a nonfiction book, a GLOSSARY is used to:',
+    options:[
+      'List the chapters in the book',
+      'Define important vocabulary words',
+      'Show maps and illustrations',
+      'Describe the author\'s background'
+    ],
+    answer:1,
+    explanation:'A GLOSSARY is like a mini-dictionary at the back of a book — it defines the important vocabulary words used in that book. You\'ll find it at the back. The TABLE OF CONTENTS lists chapters at the front. The INDEX helps you find topics by page number. The BIBLIOGRAPHY lists sources used.'
+  },
+
+  // --- Informational Text: Reading Strategies ---
+  {
+    id:78, subject:'reading', topic:'Making Inferences', difficulty:2,
+    question:'You read: "Maria walked into the room. Her shoulders drooped, and she slowly sat down without saying a word." What can you INFER about Maria?',
+    options:[
+      'Maria is very tired from running.',
+      'Maria is probably feeling sad or upset.',
+      'Maria is excited about something.',
+      'Maria is bored with school.'
+    ],
+    answer:1,
+    explanation:'An INFERENCE uses text clues + your experience. Clues: "shoulders drooped" (body language for sadness), "slowly sat down" (low energy), "without saying a word" (withdrawn). These behaviors together suggest sadness or upset feelings. This is inference — the text doesn\'t SAY she\'s sad, but shows it through her actions.'
+  },
+  {
+    id:79, subject:'reading', topic:'Text Features', difficulty:1,
+    question:'If you want to quickly find information about volcanoes in a science textbook, you would FIRST look at the:',
+    options:['Glossary','Table of Contents','Introduction','Bibliography'],
+    answer:1,
+    explanation:'The TABLE OF CONTENTS at the beginning of a book lists all the chapters and their page numbers. It lets you quickly find the section about volcanoes. You\'d use the GLOSSARY to look up volcanic vocabulary words, and the INDEX to find specific references within chapters.'
+  },
+  {
+    id:80, subject:'reading', topic:'Compare & Contrast', difficulty:2,
+    question:'When you SUMMARIZE a passage, you should:',
+    options:[
+      'Copy the passage word for word',
+      'Write down only your personal opinion about the topic',
+      'Include the main idea and key details in your own words',
+      'List all vocabulary words from the passage'
+    ],
+    answer:2,
+    explanation:'A SUMMARY captures the MAIN IDEA + KEY DETAILS in a short form, using YOUR OWN words. It should answer: who, what, when, where, why. A summary does NOT include every single detail, your personal opinions, or copied text. Think of it as explaining the passage to a friend in 3-4 sentences.'
+  },
+  {
+    id:81, subject:'reading', topic:'Fact vs. Opinion', difficulty:2,
+    question:'Which of these sentences is a FACT?',
+    options:[
+      'Dogs are the best pets in the world.',
+      'Dogs are more fun than cats.',
+      'Dogs have been human companions for over 15,000 years.',
+      'Everyone should own a dog.'
+    ],
+    answer:2,
+    explanation:'A FACT can be proven true or false with evidence. "Dogs have been human companions for over 15,000 years" is a historical fact that can be verified. An OPINION expresses a personal belief or feeling and uses words like "best," "better," "should." Options A, B, D are all opinions — they reflect preferences!'
+  },
+  {
+    id:82, subject:'reading', topic:'Figurative Language', difficulty:3,
+    question:'"The classroom was a zoo before the teacher arrived." This is an example of:',
+    options:['Simile','Hyperbole','Metaphor','Alliteration'],
+    answer:2,
+    explanation:'A METAPHOR directly calls one thing another thing without using "like" or "as." The classroom IS called a "zoo" — meaning it was chaotic and noisy (like a zoo), but it\'s not a literal zoo! Compare with a simile: "The classroom was LIKE a zoo." Metaphors make writing more vivid and impactful.'
+  },
+  {
+    id:83, subject:'reading', topic:'Making Connections', difficulty:2,
+    question:'A student reads a book about a girl who moves to a new school and feels nervous. The student thinks, "I felt the same way when I moved last year." This is an example of:',
+    options:[
+      'Text-to-text connection',
+      'Text-to-self connection',
+      'Text-to-world connection',
+      'Making an inference'
+    ],
+    answer:1,
+    explanation:'Making CONNECTIONS helps readers understand and remember text better. Types: TEXT-TO-SELF (connects to YOUR personal experience — "this reminds me of when I..."), TEXT-TO-TEXT (connects to another book/movie), TEXT-TO-WORLD (connects to events in the real world). Here the student is connecting to their own experience = text-to-self!'
+  },
+  {
+    id:84, subject:'reading', topic:'Alliteration', difficulty:2,
+    question:'"Peter Piper picked a peck of pickled peppers." This is an example of:',
+    options:['Rhyme','Alliteration','Onomatopoeia','Personification'],
+    answer:1,
+    explanation:'ALLITERATION is when several words in a row start with the SAME consonant sound. Here, most words start with the "P" sound: Peter, Piper, picked, peck, pickled, peppers. Alliteration is used in poetry and tongue twisters to create a musical, rhythmic effect!'
+  },
+  {
+    id:85, subject:'reading', topic:'Figurative Language', difficulty:2,
+    question:'"The thunder CRASHED and BOOMED across the sky." The words "crashed" and "boomed" are examples of:',
+    options:['Alliteration','Hyperbole','Onomatopoeia','Simile'],
+    answer:2,
+    explanation:'ONOMATOPOEIA is when a word sounds like the thing it describes. "Crash," "boom," "sizzle," "buzz," "hiss," "snap," "pop" — these words imitate real sounds. Using onomatopoeia makes writing more vivid and helps readers HEAR what is happening in the story!'
+  },
+
+  // ===================== LANGUAGE =====================
+  // --- Grammar ---
+  {
+    id:86, subject:'language', topic:'Capitalization', difficulty:1,
+    question:'Which sentence uses correct capitalization?',
+    options:[
+      'My teacher mr. smith is very funny.',
+      'My Teacher Mr. Smith Is Very Funny.',
+      'My teacher Mr. Smith is very funny.',
+      'my teacher mr. smith is very funny.'
+    ],
+    answer:2,
+    explanation:'Capitalize: the first word of a sentence ("My"), and proper nouns — names of specific people, places, or things. "Mr. Smith" is a proper noun (a specific person\'s name), so both "Mr." and "Smith" are capitalized. Common nouns like "teacher" are NOT capitalized unless starting a sentence.'
+  },
+  {
+    id:87, subject:'language', topic:'Punctuation', difficulty:1,
+    question:'Which sentence has CORRECT punctuation for a list?',
+    options:[
+      'I love pizza tacos and sushi.',
+      'I love pizza, tacos, and sushi.',
+      'I love, pizza, tacos and sushi.',
+      'I love pizza, tacos and, sushi.'
+    ],
+    answer:1,
+    explanation:'When listing 3 or more items, use commas to separate them. The comma before the last "and" is called the Oxford comma (or serial comma): "pizza, tacos, AND sushi." It prevents confusion. No comma needed between just two items: "I love pizza and sushi."'
+  },
+  {
+    id:88, subject:'language', topic:'Parts of Speech', difficulty:1,
+    question:'Which word is a NOUN?',
+    options:['quickly','running','happiness','beautiful'],
+    answer:2,
+    explanation:'A NOUN is a person, place, thing, or IDEA. "Happiness" is an abstract noun — an idea or feeling you can\'t touch. "Quickly" is an adverb (describes HOW), "running" is a verb (an action), "beautiful" is an adjective (describes something). Abstract nouns include: love, freedom, courage, knowledge, friendship.'
+  },
+  {
+    id:89, subject:'language', topic:'Parts of Speech', difficulty:1,
+    question:'Which word is the VERB in this sentence? "The children played happily outside."',
+    options:['children','played','happily','outside'],
+    answer:1,
+    explanation:'A VERB is the action word. "Played" tells us what the children DID — it\'s the action. "Children" is the subject (noun), "happily" is an adverb (how they played), "outside" is an adverb/preposition (where they played). To find the verb, ask: "What did the subject DO?"'
+  },
+  {
+    id:90, subject:'language', topic:'Subject-Verb Agreement', difficulty:2,
+    question:'Choose the CORRECT verb: "She _____ to school every day."',
+    options:['walk','walking','walks','walked'],
+    answer:2,
+    explanation:'Subject-verb agreement: the verb must match its subject. "She" is third-person singular, so we add "-s" to the verb: she WALKS. Compare: "I walk," "you walk," "he/she/it WALKS," "we walk," "they walk." Third-person singular (he/she/it) always gets an -s in present tense!'
+  },
+  {
+    id:91, subject:'language', topic:'Pronouns', difficulty:2,
+    question:'Which sentence uses CORRECT pronouns?',
+    options:[
+      'Him and me went to the store.',
+      'He and I went to the store.',
+      'Him and I went to the store.',
+      'He and me went to the store.'
+    ],
+    answer:1,
+    explanation:'"He" and "I" are SUBJECT pronouns (they do the action). "Him" and "me" are OBJECT pronouns (they receive the action). Since "went" needs subject pronouns: "He and I went." Trick: remove one name and test it — "I went to the store" ✓ vs. "Me went to the store" ✗. Always use subject pronouns as the doer!'
+  },
+  {
+    id:92, subject:'language', topic:'Pronouns', difficulty:2,
+    question:'Choose the correct pronoun: "The trophy belongs to Sarah and ___."',
+    options:['I','me','myself','mine'],
+    answer:1,
+    explanation:'"Belongs to" uses an object pronoun (preposition + pronoun). After prepositions (to, for, with, from), use OBJECT pronouns: me, him, her, us, them. Test it: "The trophy belongs to me" ✓ vs. "The trophy belongs to I" ✗. "I" is a subject pronoun and can\'t follow a preposition!'
+  },
+  {
+    id:93, subject:'language', topic:'Verb Tenses', difficulty:1,
+    question:'Which sentence is written in the PAST tense?',
+    options:[
+      'She runs to school every morning.',
+      'She will run to school tomorrow.',
+      'She ran to school this morning.',
+      'She is running to school right now.'
+    ],
+    answer:2,
+    explanation:'PAST TENSE: describes actions that already happened. "Ran" is the past tense of "run." Clue word: "this morning" (already happened). Present tense = runs (now/always), Future tense = will run (not yet), Present progressive = is running (happening right now). Regular past tense adds -ed; "run" is irregular → ran.'
+  },
+  {
+    id:94, subject:'language', topic:'Adjectives', difficulty:1,
+    question:'Which sentence contains an ADJECTIVE?',
+    options:[
+      'The bird sings loudly.',
+      'She walked away quickly.',
+      'The tiny puppy barked at me.',
+      'He ate his dinner fast.'
+    ],
+    answer:2,
+    explanation:'An ADJECTIVE describes or modifies a noun. In "the TINY puppy," "tiny" is an adjective describing the puppy (a noun). The other options have adverbs: "loudly" describes how the bird sings, "quickly" describes how she walked, "fast" describes how he ate — all adverbs modifying verbs!'
+  },
+  {
+    id:95, subject:'language', topic:'Adverbs', difficulty:1,
+    question:'Which sentence contains an ADVERB?',
+    options:[
+      'The happy dog played in the yard.',
+      'He finished his homework quickly.',
+      'A tall tree stood in the park.',
+      'The red car zoomed by.'
+    ],
+    answer:1,
+    explanation:'An ADVERB modifies a VERB, adjective, or other adverb. "Quickly" describes HOW he finished — it modifies the verb "finished." Many adverbs end in "-ly." The other options have adjectives: "happy" describes the dog, "tall" describes the tree, "red" describes the car. Adjectives modify NOUNS; adverbs modify VERBS!'
+  },
+  {
+    id:96, subject:'language', topic:'Relative Pronouns', difficulty:3,
+    question:'Which sentence uses a RELATIVE PRONOUN correctly?',
+    options:[
+      'The boy which played soccer is my friend.',
+      'The boy who played soccer is my friend.',
+      'The boy what played soccer is my friend.',
+      'The boy where played soccer is my friend.'
+    ],
+    answer:1,
+    explanation:'Relative pronouns connect clauses and refer back to a noun. Use WHO for PEOPLE, WHICH for things/animals, THAT for either. "The boy who played soccer" — since "boy" is a person, use WHO. "Which" is used for objects: "The book which I read was great." Never use "what" or "where" as relative pronouns in this context!'
+  },
+
+  // --- Mechanics ---
+  {
+    id:97, subject:'language', topic:'Complete Sentences', difficulty:1,
+    question:'Which of these is a COMPLETE sentence?',
+    options:[
+      'Running in the park every afternoon.',
+      'The tall boy with the red backpack.',
+      'We went to the movies on Friday.',
+      'Because it was raining so hard outside.'
+    ],
+    answer:2,
+    explanation:'A complete sentence needs: 1) a SUBJECT (who/what), 2) a PREDICATE (verb — what they do). "We went to the movies" — Subject: "We," Predicate: "went to the movies" ✓. Option A has no subject. Option B has no verb. Option D is a dependent clause (starts with "because") — it can\'t stand alone!'
+  },
+  {
+    id:98, subject:'language', topic:'Run-On Sentences', difficulty:2,
+    question:'Which of these is a RUN-ON SENTENCE?',
+    options:[
+      'I like apples.',
+      'I like apples, and I like oranges.',
+      'I like apples I like oranges I like bananas.',
+      'I like apples, oranges, and bananas.'
+    ],
+    answer:2,
+    explanation:'A RUN-ON sentence joins two or more independent clauses WITHOUT proper punctuation or conjunctions. Option C has three complete thoughts crammed together with no punctuation or conjunctions. Fix it: "I like apples. I like oranges. I like bananas." OR "I like apples, oranges, and bananas."'
+  },
+  {
+    id:99, subject:'language', topic:'Punctuation', difficulty:1,
+    question:'Which punctuation mark should end a QUESTION?',
+    options:['Period (.)','Exclamation mark (!)','Question mark (?)','Comma (,)'],
+    answer:2,
+    explanation:'End punctuation rules: Period (.) = statement (declarative sentence), Question mark (?) = question (interrogative sentence), Exclamation mark (!) = strong emotion or command (exclamatory sentence). Commas are NOT end punctuation — they go inside a sentence to show a pause or separate items.'
+  },
+  {
+    id:100, subject:'language', topic:'Punctuation', difficulty:2,
+    question:'Which sentence is punctuated CORRECTLY?',
+    options:[
+      'After the big game we went for ice cream.',
+      'After the big game, we went for ice cream.',
+      'After the big game we, went for ice cream.',
+      'After, the big game we went for ice cream.'
+    ],
+    answer:1,
+    explanation:'An INTRODUCTORY PHRASE or clause at the start of a sentence should be followed by a comma. "After the big game" is an introductory prepositional phrase. A comma after it separates the introduction from the main clause: "After the big game, [COMMA] we went for ice cream." This helps the reader know where the main sentence begins!'
+  },
+  {
+    id:101, subject:'language', topic:'Spelling', difficulty:2,
+    question:'Which word is spelled CORRECTLY?',
+    options:['nessesary','necesary','necessary','neccesary'],
+    answer:2,
+    explanation:'"Necessary" is one of the most commonly misspelled words! Memory trick: "one Collar, two Socks" — it has 1 C and 2 S\'s: ne-C-eS-S-ary. Another trick: "Never Eat Chips, Eat Salad Sandwiches And Remain Young" — the first letters spell N-E-C-E-S-S-A-R-Y!'
+  },
+  {
+    id:102, subject:'language', topic:'Spelling', difficulty:2,
+    question:'Which word is spelled CORRECTLY?',
+    options:['recieve','beleive','receve','receive'],
+    answer:3,
+    explanation:'"Receive" follows the rule "I before E, except after C." After the letter C, we use E before I: re-C-E-I-ve. The rule: "i before e except after c" (or when sounded like 'ay' as in neighbor and weigh). Watch out: "believe" also has ie, but there\'s no C before it: bel-I-E-ve.'
+  },
+  {
+    id:103, subject:'language', topic:'Quotation Marks', difficulty:2,
+    question:'Which sentence uses QUOTATION MARKS correctly?',
+    options:[
+      'She said, "I\'m really hungry right now."',
+      'She said "I\'m really hungry right now".',
+      'She said, I\'m really hungry right now.',
+      '"She said, I\'m really hungry right now."'
+    ],
+    answer:0,
+    explanation:'Correct dialogue punctuation: 1) Use a comma after the dialogue tag (said, asked, whispered), 2) Opening quotation marks before the speech, 3) Punctuation (period, ?) goes INSIDE the closing quotation marks. So: She said, "I\'m really hungry right now." The period is inside the quotes!'
+  },
+
+  // --- Usage ---
+  {
+    id:104, subject:'language', topic:'Homophones', difficulty:2,
+    question:'Choose the CORRECT words: "We ___ going ___ the park over ___."',
+    options:[
+      'are, too, there',
+      'our, to, their',
+      'are, to, there',
+      'are, too, their'
+    ],
+    answer:2,
+    explanation:'Homophones sound alike but have different meanings: ARE = verb (to be), OUR = belonging to us. TO = direction/infinitive, TOO = also or excessively, TWO = the number 2. THERE = a place, THEIR = belonging to them, THEY\'RE = they are. "We ARE going TO the park over THERE." ✓'
+  },
+  {
+    id:105, subject:'language', topic:'Conjunctions', difficulty:2,
+    question:'Which conjunction BEST completes the sentence? "I wanted to go outside, ___ it was raining hard."',
+    options:['and','but','or','so'],
+    answer:1,
+    explanation:'CONJUNCTIONS join clauses. "But" shows CONTRAST or opposition between two ideas. "I wanted to go outside" (one thing) vs. "it was raining hard" (opposite/obstacle) — these contrast, so "but" is perfect. "And" adds similar ideas, "or" shows choice, "so" shows result/consequence.'
+  },
+  {
+    id:106, subject:'language', topic:'Verb Tenses', difficulty:2,
+    question:'Which sentence is written in the FUTURE tense?',
+    options:[
+      'She learned French last year.',
+      'She is learning French right now.',
+      'She will learn French next year.',
+      'She has learned French already.'
+    ],
+    answer:2,
+    explanation:'FUTURE TENSE describes actions that have NOT happened yet. "Will" is the main helper verb for future tense: she WILL learn. Clue: "next year" (hasn\'t happened). Past = "learned," Present progressive = "is learning," Present perfect = "has learned" (completed action with relevance to now).'
+  },
+  {
+    id:107, subject:'language', topic:'Prepositions', difficulty:1,
+    question:'What is the PREPOSITION in this sentence? "The cat sat quietly under the old table."',
+    options:['cat','sat','under','table'],
+    answer:2,
+    explanation:'A PREPOSITION shows the relationship between a noun and another word (often showing location, direction, or time). "Under" shows WHERE the cat sat — its position relative to the table. Common prepositions: under, over, beside, behind, through, between, across, into, onto, from, to.'
+  },
+  {
+    id:108, subject:'language', topic:'Apostrophes', difficulty:2,
+    question:'Which sentence uses an APOSTROPHE correctly?',
+    options:[
+      "The dog wagged it's tail happily.",
+      "The dog wagged its tail happily.",
+      "The dogs tail was wagging.",
+      "The dog\'s wagged its tail."
+    ],
+    answer:1,
+    explanation:'"Its" (no apostrophe) = belonging to it (possessive pronoun). "It\'s" (with apostrophe) = it is or it has (contraction). Test: substitute "it is" — "The dog wagged IT IS tail" sounds wrong, so NO apostrophe. "Its tail" ✓. For possession with nouns: "the dog\'s tail" uses apostrophe + s. Pronouns (its, his, hers, ours, theirs) NEVER use apostrophes for possession!'
+  }
+];
+
+// ============================================================
+// APP STATE
+// ============================================================
+let state = {
+  selectedSubject: 'all',
+  selectedMode: 'practice',
+  quizQuestions: [],
+  currentIndex: 0,
+  score: 0,
+  streak: 0,
+  currentDifficulty: 2,   // 1=easy, 2=medium, 3=hard
+  consecutiveCorrect: 0,
+  consecutiveWrong: 0,
+  answered: false,
+  wrongAnswers: [],        // {question, chosen, correct}
+  topicStats: {},          // { topic: {correct:n, total:n} }
+  timerInterval: null,
+  timerSeconds: 0,
+  totalTimerSeconds: 0,
+};
+
+// ============================================================
+// UI HELPERS
+// ============================================================
+function $(id) { return document.getElementById(id); }
+
+function showScreen(id) {
+  ['homeScreen','quizScreen','resultsScreen','reviewScreen'].forEach(s => {
+    $(s).style.display = s === id ? 'block' : 'none';
+  });
+}
+
+function selectSubject(subject, el) {
+  state.selectedSubject = subject;
+  document.querySelectorAll('.subject-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function selectMode(mode, el) {
+  state.selectedMode = mode;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+// ============================================================
+// STARFIELD
+// ============================================================
+function buildStars() {
+  const container = $('starsContainer');
+  for (let i = 0; i < 80; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    star.style.left = Math.random() * 100 + '%';
+    star.style.top = Math.random() * 100 + '%';
+    star.style.setProperty('--d', (2 + Math.random() * 4) + 's');
+    star.style.setProperty('--o', (0.3 + Math.random() * 0.7).toFixed(2));
+    container.appendChild(star);
+  }
+}
+
+// ============================================================
+// QUIZ SETUP
+// ============================================================
+function buildQuestionSet(subject, difficulty) {
+  let pool = subject === 'all' ? [...QUESTIONS] : QUESTIONS.filter(q => q.subject === subject);
+  // Shuffle
+  pool.sort(() => Math.random() - 0.5);
+  // For test mode take 20 questions; practice mode take more
+  const count = state.selectedMode === 'test' ? 20 : Math.min(pool.length, 30);
+  return pool.slice(0, count);
+}
+
+function startQuiz() {
+  state.currentDifficulty = 2;
+  state.consecutiveCorrect = 0;
+  state.consecutiveWrong = 0;
+  state.currentIndex = 0;
+  state.score = 0;
+  state.streak = 0;
+  state.wrongAnswers = [];
+  state.topicStats = {};
+  state.answered = false;
+
+  state.quizQuestions = buildQuestionSet(state.selectedSubject);
+
+  showScreen('quizScreen');
+  $('timerWrap').classList.toggle('active', state.selectedMode === 'test');
+
+  if (state.selectedMode === 'test') {
+    state.totalTimerSeconds = state.quizQuestions.length * 90; // 90s per question
+    state.timerSeconds = state.totalTimerSeconds;
+    startTimer();
+  }
+
+  renderQuestion();
+}
+
+// ============================================================
+// TIMER
+// ============================================================
+function startTimer() {
+  clearInterval(state.timerInterval);
+  state.timerInterval = setInterval(() => {
+    state.timerSeconds--;
+    updateTimerDisplay();
+    if (state.timerSeconds <= 0) {
+      clearInterval(state.timerInterval);
+      endQuiz();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(state.timerSeconds / 60);
+  const s = state.timerSeconds % 60;
+  const display = `⏱ ${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  $('timerDisplay').textContent = display;
+  $('timerDisplay').classList.toggle('urgent', state.timerSeconds <= 30);
+}
+
+// ============================================================
+// SHUFFLE OPTIONS (prevents pattern-guessing)
+// Returns { shuffledOptions, shuffledAnswer }
+// ============================================================
+function shuffleOptions(q) {
+  const indexed = q.options.map((text, i) => ({ text, isCorrect: i === q.answer }));
+  for (let i = indexed.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indexed[i], indexed[j]] = [indexed[j], indexed[i]];
+  }
+  const shuffledAnswer = indexed.findIndex(o => o.isCorrect);
+  return { shuffledOptions: indexed.map(o => o.text), shuffledAnswer };
+}
+
+// ============================================================
+// RENDER QUESTION
+// ============================================================
+function renderQuestion() {
+  const q = state.quizQuestions[state.currentIndex];
+  state.answered = false;
+  // Shuffle options so answer position isn't predictable
+  const { shuffledOptions, shuffledAnswer } = shuffleOptions(q);
+  q._shuffledOptions = shuffledOptions;
+  q._shuffledAnswer = shuffledAnswer;
+
+  // Progress
+  const pct = (state.currentIndex / state.quizQuestions.length) * 100;
+  $('progressFill').style.width = pct + '%';
+  $('progressText').textContent = `Question ${state.currentIndex + 1} of ${state.quizQuestions.length}`;
+  $('scoreChip').textContent = `${state.score} ⭐`;
+
+  // Subject badge
+  const subjectConfig = {
+    math:     { label:'🔢 Math',     bg:'rgba(59,130,246,0.2)', color:'#60a5fa' },
+    reading:  { label:'📚 Reading',  bg:'rgba(34,197,94,0.2)',  color:'#4ade80' },
+    language: { label:'✏️ Language', bg:'rgba(245,158,11,0.2)', color:'#fbbf24' },
+  };
+  const cfg = subjectConfig[q.subject] || subjectConfig.math;
+  const badge = $('subjectBadge');
+  badge.textContent = cfg.label;
+  badge.style.background = cfg.bg;
+  badge.style.color = cfg.color;
+
+  // Difficulty stars
+  const diffMap = { 1:'⭐', 2:'⭐⭐', 3:'⭐⭐⭐' };
+  $('diffStars').textContent = diffMap[q.difficulty] || '⭐⭐';
+  $('topicTag').textContent = q.topic;
+
+  // Streak banner
+  const banner = $('streakBanner');
+  banner.style.display = 'none';
+  if (state.streak >= 3) {
+    banner.textContent = `🔥 ${state.streak} in a row! Keep going!`;
+    banner.style.display = 'block';
+  }
+
+  // Question
+  $('questionNum').textContent = `Question ${state.currentIndex + 1}`;
+
+  // Passage (if any)
+  const passageBox = $('passageBox');
+  if (q.passage) {
+    passageBox.textContent = q.passage;
+    passageBox.classList.remove('hidden');
+  } else {
+    passageBox.classList.add('hidden');
+    passageBox.textContent = '';
+  }
+
+  $('questionText').textContent = q.question;
+
+  // Options (use shuffled)
+  const grid = $('optionsGrid');
+  grid.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  q._shuffledOptions.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="opt-letter">${letters[i]}</span><span class="opt-text">${opt}</span>`;
+    btn.onclick = () => handleAnswer(i, btn);
+    grid.appendChild(btn);
+  });
+
+  // Hide feedback & next
+  $('feedbackPanel').style.display = 'none';
+  $('feedbackPanel').className = 'feedback-panel';
+  $('nextBtn').classList.add('hidden');
+
+  // Animate card
+  const card = $('questionCard');
+  card.style.animation = 'none';
+  requestAnimationFrame(() => { card.style.animation = ''; });
+}
+
+// ============================================================
+// HANDLE ANSWER
+// ============================================================
+function handleAnswer(chosen, btn) {
+  if (state.answered) return;
+  state.answered = true;
+
+  const q = state.quizQuestions[state.currentIndex];
+  const correct = q._shuffledAnswer;  // use shuffled position
+  const allBtns = document.querySelectorAll('.option-btn');
+
+  // Track topic stats
+  if (!state.topicStats[q.topic]) state.topicStats[q.topic] = { correct:0, total:0 };
+  state.topicStats[q.topic].total++;
+
+  allBtns.forEach(b => b.disabled = true);
+
+  const isCorrect = chosen === correct;
+
+  // Highlight correct answer always
+  allBtns[correct].classList.add('correct');
+
+  if (isCorrect) {
+    state.score++;
+    state.streak++;
+    state.consecutiveCorrect++;
+    state.consecutiveWrong = 0;
+    state.topicStats[q.topic].correct++;
+    if (state.consecutiveCorrect >= 2 && state.currentDifficulty < 3) {
+      state.currentDifficulty++;
+      state.consecutiveCorrect = 0;
+    }
+    showFeedback(true, q.explanation, null);
+    launchConfetti();
+  } else {
+    btn.classList.add('incorrect');
+    state.streak = 0;
+    state.consecutiveWrong++;
+    state.consecutiveCorrect = 0;
+    if (state.consecutiveWrong >= 2 && state.currentDifficulty > 1) {
+      state.currentDifficulty--;
+      state.consecutiveWrong = 0;
+    }
+    state.wrongAnswers.push({ q, chosen, correct, chosenText: q._shuffledOptions[chosen], correctText: q._shuffledOptions[correct] });
+    showFeedback(false, q.explanation, q._shuffledOptions[correct]);
+  }
+
+  // Dim unselected wrong options
+  allBtns.forEach((b, i) => {
+    if (i !== correct && i !== chosen) b.classList.add('dimmed');
+  });
+
+  $('nextBtn').classList.remove('hidden');
+  $('scoreChip').textContent = `${state.score} ⭐`;
+}
+
+// ============================================================
+// FEEDBACK
+// ============================================================
+function showFeedback(isCorrect, explanation, correctText) {
+  const panel = $('feedbackPanel');
+  const headline = $('feedbackHeadline');
+  const expl = $('feedbackExplanation');
+  const note = $('correctAnswerNote');
+
+  const positives = [
+    '🎉 Excellent!', '⭐ Correct!', '🚀 You got it!',
+    '🌟 Awesome!',  '💡 That\'s right!', '🎯 Bull\'s-eye!',
+    '🏆 Perfect!',   '✨ Great thinking!'
+  ];
+  const negatives = [
+    '❌ Not quite…', '😅 Almost!', '🔄 Try to remember this one!',
+    '📖 Good to review!', '💪 Keep going!'
+  ];
+
+  if (isCorrect) {
+    headline.textContent = positives[Math.floor(Math.random() * positives.length)];
+    headline.className = 'feedback-headline correct-fb';
+    panel.className = 'feedback-panel correct-fb';
+    note.classList.add('hidden');
+  } else {
+    headline.textContent = negatives[Math.floor(Math.random() * negatives.length)];
+    headline.className = 'feedback-headline incorrect-fb';
+    panel.className = 'feedback-panel incorrect-fb';
+    note.textContent = `✅ Correct answer: ${correctText}`;
+    note.classList.remove('hidden');
+  }
+
+  expl.textContent = explanation;
+  panel.style.display = 'block';
+}
+
+// ============================================================
+// NEXT QUESTION
+// ============================================================
+function nextQuestion() {
+  state.currentIndex++;
+  if (state.currentIndex >= state.quizQuestions.length) {
+    endQuiz();
+  } else {
+    renderQuestion();
+  }
+}
+
+// ============================================================
+// END QUIZ
+// ============================================================
+function endQuiz() {
+  clearInterval(state.timerInterval);
+  showScreen('resultsScreen');
+
+  const total = state.quizQuestions.length;
+  const score = state.score;
+  const pct = total > 0 ? Math.round((score / total) * 100) : 0;
+
+  $('resultScoreBig').textContent = `${score} / ${total}`;
+  $('resultScoreLabel').textContent = `${pct}% Correct`;
+
+  let trophy, title, stars, message;
+  if (pct >= 90) {
+    trophy = '🏆'; title = 'Outstanding!'; stars = '⭐⭐⭐⭐⭐';
+    message = 'You\'re absolutely amazing! You\'re ready to ace the real MAP test! Keep up the incredible work — you\'re a 4th grade superstar! 🌟';
+    launchMegaConfetti();
+  } else if (pct >= 75) {
+    trophy = '🥇'; title = 'Great Job!'; stars = '⭐⭐⭐⭐';
+    message = 'Excellent work! You know most of the material really well. Review the topics you missed and you\'ll be unstoppable! 💪';
+  } else if (pct >= 60) {
+    trophy = '🥈'; title = 'Good Effort!'; stars = '⭐⭐⭐';
+    message = 'You\'re making great progress! Keep practicing the areas you missed. Every practice session makes you stronger! 📚';
+  } else if (pct >= 40) {
+    trophy = '🥉'; title = 'Keep Practicing!'; stars = '⭐⭐';
+    message = 'You\'re on your way! Review the explanations for questions you missed and try again. Practice makes perfect! 🌱';
+  } else {
+    trophy = '💫'; title = 'You Can Do It!'; stars = '⭐';
+    message = 'Learning takes time — that\'s totally okay! Review the lessons, ask your teacher for help, and try again. You\'ve got this! 🚀';
+  }
+
+  $('resultTrophy').textContent = trophy;
+  $('resultTitle').textContent = title;
+  $('resultStars').textContent = stars;
+  $('resultMessage').textContent = message;
+
+  // Breakdown
+  buildBreakdown();
+
+  // Hide review button if no mistakes
+  $('reviewBtn').style.display = state.wrongAnswers.length > 0 ? 'block' : 'none';
+}
+
+// ============================================================
+// BREAKDOWN
+// ============================================================
+function buildBreakdown() {
+  const container = $('breakdownRows');
+  container.innerHTML = '';
+
+  const subjectColors = { math:'#3b82f6', reading:'#22c55e', language:'#f59e0b' };
+  const subjectStats = {};
+
+  state.quizQuestions.forEach((q, i) => {
+    if (!subjectStats[q.subject]) subjectStats[q.subject] = { correct:0, total:0 };
+    subjectStats[q.subject].total++;
+    // Check if answered correctly
+    const wrongEntry = state.wrongAnswers.find(w => w.q === q);
+    if (!wrongEntry) subjectStats[q.subject].correct++;
+  });
+
+  Object.entries(subjectStats).forEach(([sub, stat]) => {
+    const pct = stat.total > 0 ? Math.round((stat.correct / stat.total) * 100) : 0;
+    const color = subjectColors[sub] || '#a855f7';
+    const labels = { math:'🔢 Math', reading:'📚 Reading', language:'✏️ Language' };
+    const row = document.createElement('div');
+    row.className = 'breakdown-row';
+    row.innerHTML = `
+      <span class="breakdown-subject">${labels[sub] || sub}</span>
+      <div class="breakdown-bar-bg">
+        <div class="breakdown-bar-fill" style="background:${color};width:0%" data-pct="${pct}"></div>
+      </div>
+      <span class="breakdown-pct" style="color:${color}">${pct}%</span>
+    `;
+    container.appendChild(row);
+  });
+
+  // Animate bars after a brief delay
+  setTimeout(() => {
+    document.querySelectorAll('.breakdown-bar-fill').forEach(bar => {
+      bar.style.width = bar.dataset.pct + '%';
+    });
+  }, 200);
+}
+
+// ============================================================
+// REVIEW
+// ============================================================
+function showReview() {
+  showScreen('reviewScreen');
+  const container = $('reviewItems');
+  container.innerHTML = '';
+  const letters = ['A','B','C','D'];
+
+  if (state.wrongAnswers.length === 0) {
+    container.innerHTML = '<p style="text-align:center;color:#94a3b8;padding:30px">🎉 You got everything right! Nothing to review!</p>';
+    return;
+  }
+
+  state.wrongAnswers.forEach(({ q, chosen, correct, chosenText, correctText }) => {
+    const item = document.createElement('div');
+    item.className = 'review-item';
+    item.innerHTML = `
+      <div class="review-q"><strong>[${q.topic}]</strong> ${q.question}</div>
+      <div class="review-your-answer">❌ Your answer: ${letters[chosen]}. ${chosenText}</div>
+      <div class="review-correct-answer">✅ Correct answer: ${letters[correct]}. ${correctText}</div>
+      <div class="review-explanation">💡 <strong>Explanation:</strong> ${q.explanation}</div>
+    `;
+    container.appendChild(item);
+  });
+}
+
+function showResults() { showScreen('resultsScreen'); }
+function restartQuiz() { startQuiz(); }
+function goHome() {
+  clearInterval(state.timerInterval);
+  showScreen('homeScreen');
+}
+
+// ============================================================
+// CONFETTI
+// ============================================================
+function launchConfetti(count = 30) {
+  const container = $('confettiContainer');
+  const colors = ['#ffd700','#ff6b6b','#a855f7','#3b82f6','#22c55e','#f59e0b','#ec4899'];
+  for (let i = 0; i < count; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = (10 + Math.random() * 80) + '%';
+    piece.style.top = '-20px';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    piece.style.setProperty('--dur', (1.5 + Math.random() * 2) + 's');
+    piece.style.setProperty('--delay', (Math.random() * 0.5) + 's');
+    container.appendChild(piece);
+    piece.addEventListener('animationend', () => piece.remove());
+  }
+}
+
+function launchMegaConfetti() {
+  for (let i = 0; i < 5; i++) {
+    setTimeout(() => launchConfetti(25), i * 300);
+  }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+buildStars();
+showScreen('homeScreen');
+
+// Pre-select defaults
+document.querySelector('[data-subject="all"]').classList.add('selected');
+document.querySelector('[data-mode="practice"]').classList.add('selected');
+</script>
+</body>
+</html>
