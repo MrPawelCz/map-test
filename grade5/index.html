@@ -28,14 +28,14 @@
     #app {
       position: relative; z-index: 1;
       max-width: 780px; margin: 0 auto;
-      padding: 20px 16px 40px;
+      padding: 12px 16px 20px;
       min-height: 100vh;
     }
-    #homeScreen { text-align: center; padding-top: 30px; }
+    #homeScreen { text-align: center; padding-top: 8px; }
     .logo-mascot { font-size: 44px; animation: bounce 2s ease-in-out infinite; display: block; margin-bottom: 4px; }
     @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
     .app-title {
-      font-size: clamp(1.8rem, 5vw, 2.8rem); font-weight: 900;
+      font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 900;
       background: linear-gradient(90deg, #FF6B9D, #c44dff, #3b82f6, #22c55e);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       margin-bottom: 6px;
@@ -245,7 +245,7 @@
     <h1 class="app-title">Grade 5 / Year 6</h1>
     <p class="app-subtitle">MAP Test Practice — Math · Reading · Language · Age 10–11</p>
 
-    <h2 style="font-size:0.9rem;color:#94a3b8;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Choose a Subject</h2>
+    <h2 style="font-size:0.9rem;color:#94a3b8;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Choose a Subject</h2>
     <div class="subject-grid">
       <div class="subject-card selected" data-subject="all" onclick="selectSubject('all',this)">
         <span class="icon">🚀</span>
@@ -269,7 +269,7 @@
       </div>
     </div>
 
-    <h2 style="font-size:0.9rem;color:#94a3b8;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Choose a Mode</h2>
+    <h2 style="font-size:0.9rem;color:#94a3b8;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Choose a Mode</h2>
     <div class="mode-row">
       <div class="mode-btn selected" data-mode="practice" onclick="selectMode('practice',this)">
         <span class="icon">🌱</span>
@@ -284,7 +284,7 @@
     </div>
 
     <button class="start-btn" onclick="startQuiz()">🚀 Start Your Adventure!</button>
-    <p style="font-size:0.78rem;color:#475569;margin-top:10px;">
+    <p style="font-size:0.78rem;color:#475569;margin-top:8px;">
       Based on NWEA MAP Growth standards for Grade 5 / Year 6 &bull; Adaptive difficulty
     </p>
     <p style="margin-top:12px"><a href="../index.html" style="color:#6b89c4;font-size:0.8rem;text-decoration:none;">← Back to grade selection</a></p>
@@ -340,7 +340,7 @@
       <button class="result-btn secondary" id="reviewBtn" onclick="showReview()">👀 Review Mistakes</button>
     </div>
     <button class="result-btn secondary" style="width:100%;margin-top:0" onclick="goHome()">🏠 Subject Menu</button>
-    <a href="../index.html" style="display:block;text-align:center;color:#6b89c4;font-size:0.85rem;text-decoration:none;margin-top:10px;">← Back to grade selection</a>
+    <a href="../index.html" style="display:block;text-align:center;color:#6b89c4;font-size:0.85rem;text-decoration:none;margin-top:8px;">← Back to grade selection</a>
   </div>
 
   <!-- REVIEW SCREEN -->
