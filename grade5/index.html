@@ -32,7 +32,7 @@
       min-height: 100vh;
     }
     #homeScreen { text-align: center; padding-top: 30px; }
-    .logo-mascot { font-size: 80px; animation: bounce 2s ease-in-out infinite; display: block; margin-bottom: 10px; }
+    .logo-mascot { font-size: 44px; animation: bounce 2s ease-in-out infinite; display: block; margin-bottom: 4px; }
     @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
     .app-title {
       font-size: clamp(1.8rem, 5vw, 2.8rem); font-weight: 900;
@@ -40,25 +40,25 @@
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       margin-bottom: 6px;
     }
-    .app-subtitle { font-size: 1.1rem; color: #94a3b8; margin-bottom: 30px; }
-    .subject-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 24px; }
+    .app-subtitle { font-size: 0.95rem; color: #94a3b8; margin-bottom: 12px; }
+    .subject-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 10px; }
     .subject-card {
       background: rgba(255,255,255,0.07); border: 2px solid transparent;
-      border-radius: 18px; padding: 20px 14px; cursor: pointer; transition: all 0.25s; text-align: center;
+      border-radius: 18px; padding: 12px 10px; cursor: pointer; transition: all 0.25s; text-align: center;
     }
     .subject-card:hover, .subject-card.selected {
       background: rgba(255,255,255,0.14); transform: translateY(-3px);
       box-shadow: 0 8px 24px rgba(0,0,0,0.3);
     }
     .subject-card.selected { border-color: var(--color); }
-    .subject-card .icon { font-size: 2.4rem; display: block; margin-bottom: 8px; }
+    .subject-card .icon { font-size: 1.8rem; display: block; margin-bottom:  4px; }
     .subject-card .label { font-weight: 700; font-size: 1.05rem; }
     .subject-card .count { font-size: 0.8rem; color: #94a3b8; margin-top: 2px; }
     .subject-card[data-subject="all"]  { --color: #FF6B9D; }
     .subject-card[data-subject="math"] { --color: #3b82f6; }
     .subject-card[data-subject="reading"] { --color: #22c55e; }
     .subject-card[data-subject="language"] { --color: #f59e0b; }
-    .mode-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+    .mode-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px; }
     .mode-btn {
       background: rgba(255,255,255,0.07); border: 2px solid transparent;
       border-radius: 14px; padding: 14px 10px; cursor: pointer; transition: all 0.2s; text-align: center;
@@ -66,7 +66,7 @@
     .mode-btn:hover, .mode-btn.selected {
       background: rgba(255,255,255,0.14); border-color: #c44dff; transform: translateY(-2px);
     }
-    .mode-btn .icon { font-size: 1.6rem; display: block; margin-bottom: 4px; }
+    .mode-btn .icon { font-size: 1.3rem; display: block; margin-bottom:  2px; }
     .mode-btn .label { font-weight: 700; font-size: 0.95rem; }
     .mode-btn .desc { font-size: 0.75rem; color: #94a3b8; margin-top: 2px; }
     .start-btn {
@@ -245,7 +245,7 @@
     <h1 class="app-title">Grade 5 / Year 6</h1>
     <p class="app-subtitle">MAP Test Practice — Math · Reading · Language · Age 10–11</p>
 
-    <h2 style="font-size:0.9rem;color:#94a3b8;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px;">Choose a Subject</h2>
+    <h2 style="font-size:0.9rem;color:#94a3b8;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Choose a Subject</h2>
     <div class="subject-grid">
       <div class="subject-card selected" data-subject="all" onclick="selectSubject('all',this)">
         <span class="icon">🚀</span>
@@ -269,7 +269,7 @@
       </div>
     </div>
 
-    <h2 style="font-size:0.9rem;color:#94a3b8;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px;">Choose a Mode</h2>
+    <h2 style="font-size:0.9rem;color:#94a3b8;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Choose a Mode</h2>
     <div class="mode-row">
       <div class="mode-btn selected" data-mode="practice" onclick="selectMode('practice',this)">
         <span class="icon">🌱</span>
@@ -284,7 +284,7 @@
     </div>
 
     <button class="start-btn" onclick="startQuiz()">🚀 Start Your Adventure!</button>
-    <p style="font-size:0.78rem;color:#475569;margin-top:18px;">
+    <p style="font-size:0.78rem;color:#475569;margin-top:10px;">
       Based on NWEA MAP Growth standards for Grade 5 / Year 6 &bull; Adaptive difficulty
     </p>
     <p style="margin-top:12px"><a href="../index.html" style="color:#6b89c4;font-size:0.8rem;text-decoration:none;">← Back to grade selection</a></p>
